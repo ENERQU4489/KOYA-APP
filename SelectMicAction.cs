@@ -4,8 +4,8 @@ namespace KOYA_APP
 {
     public class SelectMicAction : IStreamDeckAction
     {
-        public string DeviceID { get; set; }
-        public string DeviceName { get; set; }
+        public string? DeviceID { get; set; }
+        public string? DeviceName { get; set; }
         public string Name => string.IsNullOrEmpty(DeviceName) ? "Wybierz Mikrofon" : $"Mic: {DeviceName}";
         public string Description => "Przelacza wyciszenie wybranego urzadzenia";
 

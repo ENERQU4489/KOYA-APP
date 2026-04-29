@@ -7,7 +7,7 @@ namespace KOYA_APP
 {
     public class OpenAppAction : IStreamDeckAction
     {
-        public string Path { get; set; }
+        public string? Path { get; set; }
         public string Name => string.IsNullOrEmpty(Path) ? "Otwórz aplikacje" : $"Uruchom: {System.IO.Path.GetFileNameWithoutExtension(Path)}";
         public string Description => string.IsNullOrEmpty(Path) ? "Uruchamia wybrany program." : $"Sciezka: {Path}";
 
