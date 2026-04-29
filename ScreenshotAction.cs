@@ -1,11 +1,11 @@
-锘縰sing System.Runtime.InteropServices;
+using System.Runtime.InteropServices;
 
 namespace KOYA_APP
 {
     public class ScreenshotAction : IStreamDeckAction
     {
         public string Name => "Zrzut ekranu";
-        public string Description => "Robi pe艂ny zrzut ekranu (Win + PrintScreen)";
+        public string Description => "Robi pelny zrzut ekranu (Win + PrintScreen)";
 
         [DllImport("user32.dll")]
         private static extern void keybd_event(byte bVk, byte bScan, uint dwFlags, int dwExtraInfo);
@@ -16,7 +16,7 @@ namespace KOYA_APP
             const byte VK_SNAPSHOT = 0x2C; // Klucz PrintScreen
             const uint KEYEVENTF_KEYUP = 0x02;
 
-            // Sekwencja: Win w d贸艂 -> PrintScreen w d贸艂 -> PrintScreen w g贸r臋 -> Win w g贸r臋
+            // Sekwencja: Win w d髄 -> PrintScreen w d髄 -> PrintScreen w g髍e -> Win w g髍e
             keybd_event(VK_LWIN, 0, 0, 0);
             keybd_event(VK_SNAPSHOT, 0, 0, 0);
             keybd_event(VK_SNAPSHOT, 0, KEYEVENTF_KEYUP, 0);

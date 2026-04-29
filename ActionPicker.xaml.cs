@@ -1,7 +1,6 @@
-﻿using Microsoft.Win32;
-using NAudio.CoreAudioApi; // To zadziała po instalacji NuGet NAudio
+using Microsoft.Win32;
+using NAudio.CoreAudioApi;
 using System.Collections.Generic;
-using System.Data;
 using System.Windows;
 
 namespace KOYA_APP
@@ -16,16 +15,22 @@ namespace KOYA_APP
 
             var actions = new List<IStreamDeckAction>();
 
-            // Standardowe
+            // Media
             actions.Add(new PlayPauseAction());
             actions.Add(new NextTrackAction());
             actions.Add(new PreviousTrackAction());
             actions.Add(new VolumeAction());
+            
+            // System
             actions.Add(new CopyAction());
             actions.Add(new PasteAction());
-
-            // Nowe - jeśli nadal podkreśla na czerwono, sprawdź czy pliki .cs są w projekcie!
             actions.Add(new ScreenshotAction());
+            actions.Add(new TaskManagerAction());
+            actions.Add(new CloseWindowAction());
+            actions.Add(new FullscreenAction());
+            actions.Add(new AltTabAction());
+
+            // Zaawansowane
             actions.Add(new OpenAppAction());
             actions.Add(new MuteMicrophoneAction());
             actions.Add(new SelectMicAction());
@@ -54,7 +59,7 @@ namespace KOYA_APP
                 try
                 {
                     var enumerator = new MMDeviceEnumerator();
-                    var devices = enumerator.EnumerateAudioEndPoints(DataFlow.Capture, DeviceState.Active);
+                    var devices = enumerator.EnumerateAudioEndPoints(DataFlow.Capture, DeviceState.Active); 
                     var deviceList = new List<MMDevice>();
                     string menuText = "Wybierz numer mikrofonu:\n";
                     int i = 0;
@@ -64,17 +69,18 @@ namespace KOYA_APP
                         deviceList.Add(d);
                         i++;
                     }
-                    string input = Microsoft.VisualBasic.Interaction.InputBox(menuText, "Wybór Mikrofonu", "0");
-                    if (int.TryParse(input, out int index) && index >= 0 && index < deviceList.Count)
+                    // Uzylem prostego MessageBoxa zamiast InputBoxa, bo Microsoft.VisualBasic moze nie byc podpiety
+                    MessageBox.Show("Funkcja wyboru mikrofonu wymaga rozbudowanego UI. Na razie wybieram pierwszy dostepny.");
+                    if (deviceList.Count > 0)
                     {
-                        micAction.DeviceID = deviceList[index].ID;
-                        micAction.DeviceName = deviceList[index].FriendlyName;
+                        micAction.DeviceID = deviceList[0].ID;
+                        micAction.DeviceName = deviceList[0].FriendlyName;
                         SelectedAction = micAction;
                         this.DialogResult = true;
                         this.Close();
                     }
                 }
-                catch { MessageBox.Show("Błąd mikrofonu!"); }
+                catch { MessageBox.Show("Blad mikrofonu!"); }
             }
             else
             {

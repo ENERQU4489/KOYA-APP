@@ -1,4 +1,4 @@
-﻿using NAudio.CoreAudioApi;
+using NAudio.CoreAudioApi;
 
 namespace KOYA_APP
 {
@@ -7,7 +7,7 @@ namespace KOYA_APP
         public string DeviceID { get; set; }
         public string DeviceName { get; set; }
         public string Name => string.IsNullOrEmpty(DeviceName) ? "Wybierz Mikrofon" : $"Mic: {DeviceName}";
-        public string Description => "Przełącza wyciszenie wybranego urządzenia";
+        public string Description => "Przelacza wyciszenie wybranego urzadzenia";
 
         public void Execute()
         {

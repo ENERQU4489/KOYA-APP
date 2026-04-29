@@ -1,11 +1,11 @@
-锘縰sing System.Runtime.InteropServices;
+using System.Runtime.InteropServices;
 
 namespace KOYA_APP
 {
     public class CopyAction : IStreamDeckAction
     {
         public string Name => "Kopiuj";
-        public string Description => "Symuluje skr贸t klawiszowy Ctrl + C (Kopiowanie).";
+        public string Description => "Symuluje skr髏 klawiszowy Ctrl + C (Kopiowanie).";
 
         [DllImport("user32.dll")]
         private static extern void keybd_event(byte bVk, byte bScan, uint dwFlags, int dwExtraInfo);
@@ -16,7 +16,7 @@ namespace KOYA_APP
             const byte VK_C = 0x43;
             const uint KEYEVENTF_KEYUP = 0x02;
 
-            // Symulacja: CTRL w d贸艂 -> C w d贸艂 -> C w g贸r臋 -> CTRL w g贸r臋
+            // Symulacja: CTRL w d髄 -> C w d髄 -> C w g髍e -> CTRL w g髍e
             keybd_event(VK_CONTROL, 0, 0, 0);
             keybd_event(VK_C, 0, 0, 0);
             keybd_event(VK_C, 0, KEYEVENTF_KEYUP, 0);

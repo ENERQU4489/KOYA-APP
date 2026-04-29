@@ -1,4 +1,4 @@
-﻿namespace KOYA_APP
+namespace KOYA_APP
 {
     public interface IStreamDeckAction
     {
