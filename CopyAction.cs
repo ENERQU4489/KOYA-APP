@@ -4,23 +4,13 @@ namespace KOYA_APP
 {
     public class CopyAction : IStreamDeckAction
     {
-        public string Name => "Kopiuj";
-        public string Description => "Symuluje skrót klawiszowy Ctrl + C (Kopiowanie).";
+        public string Name => "COPY";
+        public string Icon => "\uE16F";
+        public string Description => "System Copy (Ctrl+C)";
 
-        [DllImport("user32.dll")]
-        private static extern void keybd_event(byte bVk, byte bScan, uint dwFlags, int dwExtraInfo);
+        public void Execute() { keybd_event(0x11, 0, 0, 0); keybd_event(0x43, 0, 0, 0); keybd_event(0x43, 0, 2, 0); keybd_event(0x11, 0, 2, 0); }
+        public void ExecuteAnalog(bool direction) { }
 
-        public void Execute()
-        {
-            const byte VK_CONTROL = 0x11;
-            const byte VK_C = 0x43;
-            const uint KEYEVENTF_KEYUP = 0x02;
-
-            // Symulacja: CTRL w dól -> C w dól -> C w góre -> CTRL w góre
-            keybd_event(VK_CONTROL, 0, 0, 0);
-            keybd_event(VK_C, 0, 0, 0);
-            keybd_event(VK_C, 0, KEYEVENTF_KEYUP, 0);
-            keybd_event(VK_CONTROL, 0, KEYEVENTF_KEYUP, 0);
-        }
+        [DllImport("user32.dll")] private static extern void keybd_event(byte bVk, byte bScan, uint dwFlags, int dwExtraInfo);
     }
 }

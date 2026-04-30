@@ -4,18 +4,11 @@ namespace KOYA_APP
 {
     public class MuteMicrophoneAction : IStreamDeckAction
     {
-        public string Name => "Mute Mikrofon";
-        public string Description => "Wycisza/odcisza domyslny mikrofon";
+        public string Name => "MIC MUTE";
+        public string Icon => "\uE1D6";
+        public string Description => "Toggle Microphone";
 
-        public void Execute()
-        {
-            try
-            {
-                var enumerator = new MMDeviceEnumerator();
-                var device = enumerator.GetDefaultAudioEndpoint(DataFlow.Capture, Role.Communications);
-                device.AudioEndpointVolume.Mute = !device.AudioEndpointVolume.Mute;
-            }
-            catch { /* Ignorujemy bledy audio */ }
-        }
+        public void Execute() { try { var en = new MMDeviceEnumerator(); var d = en.GetDefaultAudioEndpoint(DataFlow.Capture, Role.Communications); d.AudioEndpointVolume.Mute = !d.AudioEndpointVolume.Mute; } catch {} }
+        public void ExecuteAnalog(bool direction) { try { var en = new MMDeviceEnumerator(); var d = en.GetDefaultAudioEndpoint(DataFlow.Capture, Role.Communications); float step = 0.05f; float cur = d.AudioEndpointVolume.MasterVolumeLevelScalar; d.AudioEndpointVolume.MasterVolumeLevelScalar = direction ? System.Math.Min(1f, cur + step) : System.Math.Max(0f, cur - step); } catch {} }
     }
 }

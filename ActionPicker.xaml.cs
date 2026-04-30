@@ -13,11 +13,11 @@ namespace KOYA_APP
         public IStreamDeckAction? SelectedAction { get; set; }
         private List<byte> _capturedKeys = new List<byte>();
 
-        public ActionPicker()
+        public ActionPicker(bool isAnalog = false)
         {
             InitializeComponent();
 
-            var actions = new List<IStreamDeckAction>
+            var allActions = new List<IStreamDeckAction>
             {
                 new PlayPauseAction(),
                 new NextTrackAction(),
@@ -30,20 +30,32 @@ namespace KOYA_APP
                 new CloseWindowAction(),
                 new FullscreenAction(),
                 new AltTabAction(),
-                new CustomShortcutAction(), // NOWOSC
+                new CustomShortcutAction(),
                 new OpenAppAction(),
                 new MuteMicrophoneAction(),
                 new MuteSpeakerAction(),
-                new SelectMicAction()
+                new SelectMicAction(),
+                new WebZoomAction()
             };
 
-            ActionsListBox.ItemsSource = actions;
+            if (isAnalog)
+            {
+                // Tylko te, ktore maja sens dla pokretla
+                ActionsListBox.ItemsSource = allActions.Where(a => 
+                    a is VolumeAction || 
+                    a is MuteMicrophoneAction || 
+                    a is WebZoomAction || 
+                    a is CustomShortcutAction).ToList();
+            }
+            else
+            {
+                ActionsListBox.ItemsSource = allActions;
+            }
         }
 
         private void ActionsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             var selected = ActionsListBox.SelectedItem as IStreamDeckAction;
-            
             ExtraSettingsPanel.Visibility = Visibility.Collapsed;
             DevicesComboBox.Visibility = Visibility.Collapsed;
             ShortcutTextBox.Visibility = Visibility.Collapsed;
@@ -54,10 +66,27 @@ namespace KOYA_APP
                 DevicesComboBox.Visibility = Visibility.Visible;
                 ExtraSettingsTitle.Text = "Wybierz urzadzenie wejsciowe (Mikrofon):";
                 
-                var enumerator = new MMDeviceEnumerator();
-                var devices = enumerator.EnumerateAudioEndPoints(DataFlow.Capture, DeviceState.Active).ToList();
-                DevicesComboBox.ItemsSource = devices;
-                if (devices.Count > 0) DevicesComboBox.SelectedIndex = 0;
+                try
+                {
+                    var enumerator = new MMDeviceEnumerator();
+                    var devices = enumerator.EnumerateAudioEndPoints(DataFlow.Capture, DeviceState.Active).ToList();
+                    DevicesComboBox.ItemsSource = devices;
+                    if (devices.Count > 0) 
+                    {
+                        DevicesComboBox.SelectedIndex = 0;
+                        DevicesComboBox.IsEnabled = true;
+                    }
+                    else
+                    {
+                        ExtraSettingsTitle.Text = "BRAK URZADZEN AUDIO!";
+                        DevicesComboBox.IsEnabled = false;
+                    }
+                }
+                catch (System.Exception ex)
+                {
+                    ExtraSettingsTitle.Text = "BLAD AUDIO: " + ex.Message;
+                    DevicesComboBox.IsEnabled = false;
+                }
             }
             else if (selected is CustomShortcutAction)
             {
@@ -67,34 +96,16 @@ namespace KOYA_APP
                 _capturedKeys.Clear();
                 ShortcutTextBox.Text = "Kliknij tutaj i wcisnij klawisze...";
             }
-            else if (selected is OpenAppAction)
-            {
-                ExtraSettingsPanel.Visibility = Visibility.Visible;
-                ExtraSettingsTitle.Text = "Sciezka zostanie wybrana po kliknieciu 'Zatwierdz'";
-            }
         }
 
-        private void ShortcutTextBox_PreviewKeyDown(object sender, KeyEventArgs e)
+        private void ShortcutTextBox_PreviewKeyDown(object sender, System.Windows.Input.KeyEventArgs e)
         {
             e.Handled = true;
-            
-            // Konwertujemy klawisz WPF na VirtualKey (Win32)
             int vk = KeyInterop.VirtualKeyFromKey(e.Key);
             if (vk == 0) return;
-
             byte vkByte = (byte)vk;
-
-            if (!_capturedKeys.Contains(vkByte))
-            {
-                _capturedKeys.Add(vkByte);
-            }
-
-            // Wyswietlamy nazwy klawiszy
-            List<string> keyNames = new List<string>();
-            foreach (var k in _capturedKeys)
-            {
-                keyNames.Add(((Key)KeyInterop.KeyFromVirtualKey(k)).ToString());
-            }
+            if (!_capturedKeys.Contains(vkByte)) _capturedKeys.Add(vkByte);
+            List<string> keyNames = _capturedKeys.Select(k => ((Key)KeyInterop.KeyFromVirtualKey(k)).ToString()).ToList();
             ShortcutTextBox.Text = string.Join(" + ", keyNames);
         }
 
@@ -105,44 +116,21 @@ namespace KOYA_APP
 
             if (selected is OpenAppAction appAction)
             {
-                OpenFileDialog ofd = new OpenFileDialog { Filter = "Aplikacje (*.exe)|*.exe|Wszystkie pliki (*.*)|*.*" };
-                if (ofd.ShowDialog() == true)
-                {
-                    appAction.Path = ofd.FileName;
-                    SelectedAction = appAction;
-                }
+                Microsoft.Win32.OpenFileDialog ofd = new Microsoft.Win32.OpenFileDialog { Filter = "Aplikacje (*.exe)|*.exe" };
+                if (ofd.ShowDialog() == true) { appAction.Path = ofd.FileName; SelectedAction = appAction; }
             }
             else if (selected is CustomShortcutAction shortcutAction)
             {
-                if (_capturedKeys.Count > 0)
-                {
-                    shortcutAction.KeyCodes = new List<byte>(_capturedKeys);
-                    shortcutAction.KeysDisplay = ShortcutTextBox.Text;
-                    SelectedAction = shortcutAction;
-                }
-                else
-                {
-                    MessageBox.Show("Najpierw wcisnij jakies klawisze!");
-                    return;
-                }
+                if (_capturedKeys.Count > 0) { shortcutAction.KeyCodes = new List<byte>(_capturedKeys); shortcutAction.KeysDisplay = ShortcutTextBox.Text; SelectedAction = shortcutAction; }
             }
             else if (selected is SelectMicAction micAction)
             {
                 var device = DevicesComboBox.SelectedItem as MMDevice;
-                if (device != null)
-                {
-                    micAction.DeviceID = device.ID;
-                    micAction.DeviceName = device.FriendlyName;
-                    SelectedAction = micAction;
-                }
+                if (device != null) { micAction.DeviceID = device.ID; micAction.DeviceName = device.FriendlyName; SelectedAction = micAction; }
             }
-            else
-            {
-                SelectedAction = selected;
-            }
+            else { SelectedAction = selected; }
 
-            this.DialogResult = true;
-            this.Close();
+            if (SelectedAction != null) { this.DialogResult = true; this.Close(); }
         }
 
         private void Cancel_Click(object sender, RoutedEventArgs e) => this.Close();
