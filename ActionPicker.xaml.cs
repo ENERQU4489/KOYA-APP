@@ -5,6 +5,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Diagnostics;
 
 namespace KOYA_APP
 {
@@ -35,17 +36,17 @@ namespace KOYA_APP
                 new MuteMicrophoneAction(),
                 new MuteSpeakerAction(),
                 new SelectMicAction(),
-                new WebZoomAction()
+                new WebZoomAction(),
+                new AppVolumeAction()
             };
 
             if (isAnalog)
             {
-                // Tylko te, ktore maja sens dla pokretla
                 ActionsListBox.ItemsSource = allActions.Where(a => 
                     a is VolumeAction || 
                     a is MuteMicrophoneAction || 
                     a is WebZoomAction || 
-                    a is CustomShortcutAction).ToList();
+                    a is AppVolumeAction).ToList();
             }
             else
             {
@@ -70,6 +71,7 @@ namespace KOYA_APP
                 {
                     var enumerator = new MMDeviceEnumerator();
                     var devices = enumerator.EnumerateAudioEndPoints(DataFlow.Capture, DeviceState.Active).ToList();
+                    DevicesComboBox.DisplayMemberPath = "FriendlyName";
                     DevicesComboBox.ItemsSource = devices;
                     if (devices.Count > 0) 
                     {
@@ -86,6 +88,47 @@ namespace KOYA_APP
                 {
                     ExtraSettingsTitle.Text = "BLAD AUDIO: " + ex.Message;
                     DevicesComboBox.IsEnabled = false;
+                }
+            }
+            else if (selected is AppVolumeAction)
+            {
+                ExtraSettingsPanel.Visibility = Visibility.Visible;
+                DevicesComboBox.Visibility = Visibility.Visible;
+                ExtraSettingsTitle.Text = "Wybierz aplikacje:";
+
+                try
+                {
+                    var enumerator = new MMDeviceEnumerator();
+                    var device = enumerator.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia);
+                    var sessionManager = device.AudioSessionManager;
+                    sessionManager.RefreshSessions();
+
+                    var apps = new List<dynamic>();
+                    for (int i = 0; i < sessionManager.Sessions.Count; i++)
+                    {
+                        var session = sessionManager.Sessions[i];
+                        uint pid = session.GetProcessID;
+                        if (pid == 0) continue;
+
+                        string name;
+                        try { name = Process.GetProcessById((int)pid).ProcessName; }
+                        catch { name = session.DisplayName; }
+
+                        if (string.IsNullOrEmpty(name)) name = "Unknown App";
+                        apps.Add(new { Name = name, Id = (int)pid });
+                    }
+
+                    DevicesComboBox.DisplayMemberPath = "Name";
+                    DevicesComboBox.ItemsSource = apps;
+                    if (apps.Count > 0)
+                    {
+                        DevicesComboBox.SelectedIndex = 0;
+                        DevicesComboBox.IsEnabled = true;
+                    }
+                }
+                catch (System.Exception ex)
+                {
+                    ExtraSettingsTitle.Text = "BLAD MIXERA: " + ex.Message;
                 }
             }
             else if (selected is CustomShortcutAction)
@@ -132,6 +175,17 @@ namespace KOYA_APP
             {
                 var device = DevicesComboBox.SelectedItem as MMDevice;
                 if (device != null) { muteMicAction.DeviceId = device.ID; SelectedAction = muteMicAction; }
+            }
+            else if (selected is AppVolumeAction appVolAction)
+            {
+                var app = DevicesComboBox.SelectedItem as dynamic;
+                if (app != null)
+                {
+                    appVolAction.ProcessId = app.Id;
+                    appVolAction.AppName = app.Name;
+                    appVolAction.Name = $"VOL: {app.Name}";
+                    SelectedAction = appVolAction;
+                }
             }
             else { SelectedAction = selected; }
 

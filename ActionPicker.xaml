@@ -5,7 +5,8 @@
         Background="Transparent" WindowStyle="None" AllowsTransparency="True" 
         WindowStartupLocation="CenterOwner">
 
-    <Border CornerRadius="12" BorderThickness="1.5">
+    <Border CornerRadius="12" BorderThickness="1.5" 
+            TextElement.FontFamily="{StaticResource MainFont}" TextElement.Foreground="White">
         <Border.Background>
             <RadialGradientBrush Center="0.5,0" GradientOrigin="0.5,0" RadiusX="1" RadiusY="1">
                 <GradientStop Color="#222222" Offset="0"/>
@@ -39,25 +40,27 @@
 
             <!-- Action Grid -->
             <ListBox x:Name="ActionsListBox" Grid.Row="1" Style="{StaticResource ActionListBoxStyle}" 
-                     SelectionChanged="ActionsListBox_SelectionChanged" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                     SelectionChanged="ActionsListBox_SelectionChanged">
                 <ListBox.ItemTemplate>
                     <DataTemplate>
-                        <Grid Width="140" Height="140">
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="*"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                            </Grid.RowDefinitions>
-                            
-                            <TextBlock Grid.Row="0" Text="{Binding Icon}" FontFamily="{StaticResource IconFont}" Foreground="White" 
-                                       FontSize="42" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            
-                            <TextBlock Grid.Row="1" Text="{Binding Name}" FontFamily="{StaticResource MainFont}" Foreground="White" 
-                                       FontSize="11" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap" MaxHeight="30"/>
-                            
-                            <TextBlock Grid.Row="2" Text="{Binding Description}" Foreground="#88FFFFFF" FontSize="8" 
-                                       HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap" Margin="0,4,0,0" MaxHeight="25"/>
-                        </Grid>
+                        <Border Width="160" Height="160" Padding="15">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="2*"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                
+                                <TextBlock Grid.Row="0" Text="{Binding Icon}" FontFamily="{StaticResource IconFont}" Foreground="White" 
+                                           FontSize="48" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                
+                                <TextBlock Grid.Row="1" Text="{Binding Name}" FontFamily="{StaticResource MainFont}" Foreground="White" 
+                                           FontSize="10" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap" MaxHeight="40" Margin="0,5,0,0"/>
+                                
+                                <TextBlock Grid.Row="2" Text="{Binding Description}" Foreground="#77FFFFFF" FontSize="7.5" 
+                                           HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap" Margin="0,4,0,0" MaxHeight="35"/>
+                            </Grid>
+                        </Border>
                     </DataTemplate>
                 </ListBox.ItemTemplate>
             </ListBox>
@@ -76,13 +79,15 @@
                 </Border>
             </StackPanel>
 
-            <!-- Buttons -->
             <UniformGrid Grid.Row="3" Columns="2" Margin="0,20,0,0">
-                <Button Content="ANULUJ" Click="Cancel_Click" Style="{StaticResource GlassButtonStyle}" 
-                        Height="55" Margin="5" FontSize="14" FontFamily="{StaticResource MainFont}"/>
-                <Button Content="ZASTOSUJ" Click="Select_Click" Style="{StaticResource GlassButtonStyle}" 
-                        Height="55" Margin="5" Background="#22FFFFFF" Foreground="White" BorderBrush="White" 
-                        FontSize="14" FontFamily="{StaticResource MainFont}"/>
+                <Button Click="Cancel_Click" Style="{StaticResource GlassButtonStyle}" 
+                        Height="55" Margin="5">
+                    <TextBlock Text="ANULUJ" FontFamily="{StaticResource MainFont}" FontSize="14" Foreground="White"/>
+                </Button>
+                <Button Click="Select_Click" Style="{StaticResource GlassButtonStyle}" 
+                        Height="55" Margin="5" Background="#22FFFFFF" BorderBrush="White">
+                    <TextBlock Text="ZASTOSUJ" FontFamily="{StaticResource MainFont}" FontSize="14" Foreground="White"/>
+                </Button>
             </UniformGrid>
         </Grid>
     </Border>

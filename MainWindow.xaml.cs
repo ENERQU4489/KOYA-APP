@@ -31,17 +31,23 @@ namespace KOYA_APP
 
         private void SetupTutorial()
         {
-            // Uzywamy RootGrid nazwanego w XAML
             _tutorialManager = new TutorialManager(RootGrid);
 
-            // Dodaj kroki
+            // Bardziej szczegółowe kroki po polsku
+            _tutorialManager.AddStep(this, "Witaj w KOYA!", "Ten krótki przewodnik pokaże Ci, jak skonfigurować Twoją konsolę sterowania.");
+
             var firstButton = FindButtonByTag("0");
             if (firstButton != null)
-                _tutorialManager.AddStep(firstButton, "Digital Buttons", "These 12 buttons are for digital actions like opening apps, running macros, or system shortcuts.");
+            {
+                _tutorialManager.AddStep(firstButton, "Dodawanie Akcji", "Kliknij dowolny pusty przycisk, aby otworzyć menu wyboru akcji. Możesz tam przypisać np. 'Otwórz Aplikację' lub 'Skrót Klawiszowy'.");
+                _tutorialManager.AddStep(firstButton, "Media Control", "Szukasz bindowania Play/Pause? Wybierz 'Media Control' z listy, a następnie naciśnij 'Zastosuj'. Ikona zmieni się automatycznie!");
+            }
 
             var firstKnob = FindButtonByTag("12");
             if (firstKnob != null)
-                _tutorialManager.AddStep(firstKnob, "Analog Knobs", "Knobs support MouseWheel events. Perfect for volume control, zooming, or track seeking.");
+                _tutorialManager.AddStep(firstKnob, "Gałki Analogowe", "Gałki służą do precyzyjnej kontroli. Przewijaj kółkiem myszy nad gałką, aby np. płynnie zmieniać głośność systemu.");
+
+            _tutorialManager.AddStep(this, "Gotowe!", "To wszystko! Po zakończeniu tego samouczka, kliknij dowolny przycisk i stwórz swój własny zestaw narzędzi. Miłej zabawy!");
         }
 
         private void Tutorial_Click(object sender, RoutedEventArgs e)
@@ -66,9 +72,10 @@ namespace KOYA_APP
 
         private void UpdateButtonUI(int index, IStreamDeckAction action)
         {
-            // Znajdz przycisk po Tagu
             var btn = FindButtonByTag(index.ToString());
             if (btn == null) return;
+
+            btn.ToolTip = action.Name;
 
             if (action is OpenAppAction appAction && !string.IsNullOrEmpty(appAction.Path))
             {
@@ -79,16 +86,15 @@ namespace KOYA_APP
                     {
                         var imageSource = System.Windows.Interop.Imaging.CreateBitmapSourceFromHIcon(
                             icon.Handle, Int32Rect.Empty, System.Windows.Media.Imaging.BitmapSizeOptions.FromEmptyOptions());
-                        btn.Content = new System.Windows.Controls.Image { Source = imageSource, Stretch = System.Windows.Media.Stretch.Uniform };
+                        btn.Content = new System.Windows.Controls.Image { Source = imageSource, Stretch = System.Windows.Media.Stretch.Uniform, Margin = new Thickness(15) };
+                        return;
                     }
                 }
-                catch { btn.Content = action.Icon; }
+                catch { }
             }
-            else
-            {
-                btn.Content = action.Icon;
-            }
-            btn.ToolTip = action.Name;
+            
+            // Standardowa ikona z czcionki
+            btn.Content = action.Icon;
         }
 
         private System.Windows.Controls.Button? FindButtonByTag(string tag)
@@ -118,7 +124,7 @@ namespace KOYA_APP
             _notifyIcon = new System.Windows.Forms.NotifyIcon();
             try
             {
-                var streamResourceInfo = System.Windows.Application.GetResourceStream(new Uri("Assets/logo.png", UriKind.Relative));
+                var streamResourceInfo = System.Windows.Application.GetResourceStream(new Uri("pack://application:,,,/Assets/logo.png"));
                 if (streamResourceInfo != null)
                 {
                     using (var stream = streamResourceInfo.Stream)
@@ -174,7 +180,16 @@ namespace KOYA_APP
             }
             else
             {
-                _buttonActions[index].Execute();
+                // Jesli to galka (analog), klikniecie zwykle nic nie robi lub wywoluje Execute()
+                // Upewniamy sie, ze Execute() nie rzuca wyjatkiem dla akcji analogowych
+                try 
+                {
+                    _buttonActions[index]?.Execute();
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Action execution failed: {ex.Message}");
+                }
             }
         }
 

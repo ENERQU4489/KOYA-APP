@@ -6,7 +6,8 @@
         WindowStartupLocation="CenterScreen" ShowInTaskbar="True" Topmost="True"
         Icon="Assets/logo.png">
     
-    <Border x:Name="WindowBorder" CornerRadius="12" BorderThickness="1.5">
+    <Border x:Name="WindowBorder" CornerRadius="12" BorderThickness="1.5" 
+            TextElement.FontFamily="{StaticResource MainFont}" TextElement.Foreground="White">
         <Border.Background>
             <RadialGradientBrush Center="0.8,0.2" GradientOrigin="0.8,0.2" RadiusX="1.2" RadiusY="1.2">
                 <GradientStop Color="#111111" Offset="0"/>
@@ -24,63 +25,80 @@
         </Border.Effect>
 
         <Grid x:Name="RootGrid">
-            <Grid x:Name="MainContent" Opacity="0">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="60"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
+            <!-- Main Content Container with Rounding -->
+            <Border x:Name="MainContentBorder" CornerRadius="12" ClipToBounds="True">
+                <Grid x:Name="MainContent" Opacity="0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="60"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
 
-                <Grid Grid.Row="0" MouseDown="TitleBar_MouseDown" Background="#0AFFFFFF">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-                    <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="20,0">
-                        <Button Content="&#xE897;" Style="{StaticResource GlassButtonStyle}" Click="Tutorial_Click" BorderThickness="0" Width="40" Height="40" FontSize="14" ToolTip="Tutorial"/>
-                        <Button Content="&#xE949;" Style="{StaticResource GlassButtonStyle}" Click="Minimize_Click" BorderThickness="0" Width="40" Height="40" FontSize="12"/>
-                        <Button Content="&#xE106;" Style="{StaticResource GlassButtonStyle}" Click="Close_Click" BorderThickness="0" Width="40" Height="40" FontSize="12"/>
-                    </StackPanel>
-                </Grid>
-
-                <Grid Grid.Row="1" Margin="30">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="4*"/>
-                        <ColumnDefinition Width="1*"/>
-                    </Grid.ColumnDefinitions>
-
-                    <UniformGrid Grid.Column="0" Rows="3" Columns="4">
-                        <Button Style="{StaticResource GlassButtonStyle}" Tag="0" Click="OnDeckButtonClick" Content="&#xE710;" Margin="8"/>
-                        <Button Style="{StaticResource GlassButtonStyle}" Tag="1" Click="OnDeckButtonClick" Content="&#xE710;" Margin="8"/>
-                        <Button Style="{StaticResource GlassButtonStyle}" Tag="2" Click="OnDeckButtonClick" Content="&#xE710;" Margin="8"/>
-                        <Button Style="{StaticResource GlassButtonStyle}" Tag="3" Click="OnDeckButtonClick" Content="&#xE710;" Margin="8"/>
-                        <Button Style="{StaticResource GlassButtonStyle}" Tag="4" Click="OnDeckButtonClick" Content="&#xE710;" Margin="8"/>
-                        <Button Style="{StaticResource GlassButtonStyle}" Tag="5" Click="OnDeckButtonClick" Content="&#xE710;" Margin="8"/>
-                        <Button Style="{StaticResource GlassButtonStyle}" Tag="6" Click="OnDeckButtonClick" Content="&#xE710;" Margin="8"/>
-                        <Button Style="{StaticResource GlassButtonStyle}" Tag="7" Click="OnDeckButtonClick" Content="&#xE710;" Margin="8"/>
-                        <Button Style="{StaticResource GlassButtonStyle}" Tag="8" Click="OnDeckButtonClick" Content="&#xE710;" Margin="8"/>
-                        <Button Style="{StaticResource GlassButtonStyle}" Tag="9" Click="OnDeckButtonClick" Content="&#xE710;" Margin="8"/>
-                        <Button Style="{StaticResource GlassButtonStyle}" Tag="10" Click="OnDeckButtonClick" Content="&#xE710;" Margin="8"/>
-                        <Button Style="{StaticResource GlassButtonStyle}" Tag="11" Click="OnDeckButtonClick" Content="&#xE710;" Margin="8"/>
-                    </UniformGrid>
-
-                    <Grid Grid.Column="1" Margin="20,0,0,0">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="1*"/>
-                            <RowDefinition Height="1*"/>
-                            <RowDefinition Height="1*"/>
-                        </Grid.RowDefinitions>
-                        <Viewbox Grid.Row="0" Margin="10">
-                            <Button Style="{StaticResource KnobButtonStyle}" Tag="12" Click="OnDeckButtonClick" 
-                                    Content="&#xE995;" FontFamily="{StaticResource IconFont}" Width="100" Height="100" MouseWheel="OnKnobMouseWheel"/>
-                        </Viewbox>
+                    <!-- Title Bar -->
+                    <Grid Grid.Row="0" MouseDown="TitleBar_MouseDown" Background="#0AFFFFFF">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
                         
-                        <Viewbox Grid.Row="2" Margin="10">
-                            <Button Style="{StaticResource KnobButtonStyle}" Tag="13" Click="OnDeckButtonClick" 
-                                    Content="&#xE995;" FontFamily="{StaticResource IconFont}" Width="100" Height="100" MouseWheel="OnKnobMouseWheel"/>
-                        </Viewbox>
+                        <StackPanel Orientation="Horizontal" Margin="20,0" VerticalAlignment="Center">
+                            <TextBlock Text="KOYA" Foreground="White" FontSize="28" FontWeight="Bold" FontFamily="{StaticResource MainFont}">
+                                <TextBlock.Effect>
+                                    <DropShadowEffect BlurRadius="10" Color="White" ShadowDepth="0" Opacity="0.3"/>
+                                </TextBlock.Effect>
+                            </TextBlock>
+                            <TextBlock Text="Virtual Console" Foreground="#66FFFFFF" FontSize="12" FontFamily="{StaticResource MainFont}" Margin="12,0,0,0" VerticalAlignment="Bottom" Padding="0,0,0,4"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="20,0">
+                            <Button Content="&#xE897;" Style="{StaticResource GlassButtonStyle}" Click="Tutorial_Click" BorderThickness="0" Width="40" Height="40" FontSize="14" ToolTip="Tutorial"/>
+                            <Button Content="&#xE949;" Style="{StaticResource GlassButtonStyle}" Click="Minimize_Click" BorderThickness="0" Width="40" Height="40" FontSize="12"/>
+                            <Button Content="&#xE106;" Style="{StaticResource GlassButtonStyle}" Click="Close_Click" BorderThickness="0" Width="40" Height="40" FontSize="12"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <Grid Grid.Row="1" Margin="30">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="4*"/>
+                            <ColumnDefinition Width="1.2*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Buttons Grid -->
+                        <UniformGrid Grid.Column="0" Rows="3" Columns="4">
+                            <Button Style="{StaticResource GlassButtonStyle}" Tag="0" Click="OnDeckButtonClick" Content="&#xE710;" Margin="8"/>
+                            <Button Style="{StaticResource GlassButtonStyle}" Tag="1" Click="OnDeckButtonClick" Content="&#xE710;" Margin="8"/>
+                            <Button Style="{StaticResource GlassButtonStyle}" Tag="2" Click="OnDeckButtonClick" Content="&#xE710;" Margin="8"/>
+                            <Button Style="{StaticResource GlassButtonStyle}" Tag="3" Click="OnDeckButtonClick" Content="&#xE710;" Margin="8"/>
+                            <Button Style="{StaticResource GlassButtonStyle}" Tag="4" Click="OnDeckButtonClick" Content="&#xE710;" Margin="8"/>
+                            <Button Style="{StaticResource GlassButtonStyle}" Tag="5" Click="OnDeckButtonClick" Content="&#xE710;" Margin="8"/>
+                            <Button Style="{StaticResource GlassButtonStyle}" Tag="6" Click="OnDeckButtonClick" Content="&#xE710;" Margin="8"/>
+                            <Button Style="{StaticResource GlassButtonStyle}" Tag="7" Click="OnDeckButtonClick" Content="&#xE710;" Margin="8"/>
+                            <Button Style="{StaticResource GlassButtonStyle}" Tag="8" Click="OnDeckButtonClick" Content="&#xE710;" Margin="8"/>
+                            <Button Style="{StaticResource GlassButtonStyle}" Tag="9" Click="OnDeckButtonClick" Content="&#xE710;" Margin="8"/>
+                            <Button Style="{StaticResource GlassButtonStyle}" Tag="10" Click="OnDeckButtonClick" Content="&#xE710;" Margin="8"/>
+                            <Button Style="{StaticResource GlassButtonStyle}" Tag="11" Click="OnDeckButtonClick" Content="&#xE710;" Margin="8"/>
+                        </UniformGrid>
+
+                        <!-- Knobs Column -->
+                        <Grid Grid.Column="1" Margin="-30,0,30,0">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="1*"/>
+                                <RowDefinition Height="0.5*"/>
+                                <RowDefinition Height="1*"/>
+                            </Grid.RowDefinitions>
+                            
+                            <Viewbox Grid.Row="0" Margin="10">
+                                <Button Style="{StaticResource KnobButtonStyle}" Tag="12" Click="OnDeckButtonClick" 
+                                        Content="&#xE995;" Width="100" Height="100" MouseWheel="OnKnobMouseWheel"/>
+                            </Viewbox>
+                            
+                            <Viewbox Grid.Row="2" Margin="10">
+                                <Button Style="{StaticResource KnobButtonStyle}" Tag="13" Click="OnDeckButtonClick" 
+                                        Content="&#xE995;" Width="100" Height="100" MouseWheel="OnKnobMouseWheel"/>
+                            </Viewbox>
+                        </Grid>
                     </Grid>
                 </Grid>
-            </Grid>
+            </Border>
 
             <!-- Startup Intro Overlay -->
             <Grid x:Name="IntroOverlay" Background="Black">
