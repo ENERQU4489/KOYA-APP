@@ -71,16 +71,44 @@ namespace KOYA_APP
             _tutorialOverlay.Children.Clear();
             var step = _steps[_currentStepIndex];
 
-            // Get element position relative to container
-            var transform = step.Element.TransformToAncestor(_container);
-            var rect = transform.TransformBounds(new Rect(0, 0, step.Element.ActualWidth, step.Element.ActualHeight));
+            // Safety check for visual tree
+            if (!step.Element.IsLoaded || !step.Element.IsDescendantOf(_container))
+            {
+                // If element is not in tree or not a descendant, we can't highlight it properly
+                // Fallback: show description in the middle of the screen
+                ShowFallbackStep(step);
+                return;
+            }
 
-            // Create highlight hole
-            var geometryGroup = new GeometryGroup();
-            geometryGroup.Children.Add(new RectangleGeometry(new Rect(0, 0, _container.ActualWidth, _container.ActualHeight)));
-            geometryGroup.Children.Add(new RectangleGeometry(rect));
-            _tutorialOverlay.Background = new DrawingBrush(new GeometryDrawing(new SolidColorBrush(System.Windows.Media.Color.FromArgb(180, 0, 0, 0)), null, geometryGroup));
+            try
+            {
+                // Get element position relative to container
+                var transform = step.Element.TransformToAncestor(_container);
+                var rect = transform.TransformBounds(new Rect(0, 0, step.Element.ActualWidth, step.Element.ActualHeight));
 
+                // Create highlight hole
+                var geometryGroup = new GeometryGroup();
+                geometryGroup.Children.Add(new RectangleGeometry(new Rect(0, 0, _container.ActualWidth, _container.ActualHeight)));
+                geometryGroup.Children.Add(new RectangleGeometry(rect));
+                _tutorialOverlay.Background = new DrawingBrush(new GeometryDrawing(new SolidColorBrush(System.Windows.Media.Color.FromArgb(180, 0, 0, 0)), null, geometryGroup));
+
+                CreateTooltip(step, rect);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Tutorial error: {ex.Message}");
+                ShowFallbackStep(step);
+            }
+        }
+
+        private void ShowFallbackStep(TutorialStep step)
+        {
+            _tutorialOverlay.Background = new SolidColorBrush(System.Windows.Media.Color.FromArgb(180, 0, 0, 0));
+            CreateTooltip(step, new Rect(_container.ActualWidth/2 - 5, _container.ActualHeight/2 - 5, 10, 10));
+        }
+
+        private void CreateTooltip(TutorialStep step, Rect rect)
+        {
             // Tooltip
             _tooltipBorder = new Border
             {
@@ -88,7 +116,8 @@ namespace KOYA_APP
                 BorderBrush = System.Windows.Media.Brushes.White,
                 BorderThickness = new Thickness(1),
                 Padding = new Thickness(20),
-                Width = 300
+                Width = 300,
+                CornerRadius = new CornerRadius(8)
             };
 
             var stack = new StackPanel();
@@ -99,7 +128,8 @@ namespace KOYA_APP
                 FontSize = 18, 
                 FontWeight = FontWeights.Bold, 
                 Margin = new Thickness(0, 0, 0, 10),
-                TextWrapping = TextWrapping.Wrap
+                TextWrapping = TextWrapping.Wrap,
+                FontFamily = (System.Windows.Media.FontFamily)System.Windows.Application.Current.Resources["MainFont"]
             };
             _descText = new TextBlock 
             { 
@@ -113,7 +143,7 @@ namespace KOYA_APP
             stack.Children.Add(_descText);
             stack.Children.Add(new TextBlock 
             { 
-                Text = "Click anywhere to continue...", 
+                Text = "Kliknij gdziekolwiek, aby kontynuować...", 
                 Foreground = System.Windows.Media.Brushes.DimGray, 
                 FontSize = 10, 
                 Margin = new Thickness(0, 15, 0, 0) 
@@ -129,6 +159,9 @@ namespace KOYA_APP
             if (top + 150 > _container.ActualHeight) top = rect.Top - 170;
             if (left < 10) left = 10;
             if (left + 310 > _container.ActualWidth) left = _container.ActualWidth - 310;
+            
+            // Final safety for bounds
+            if (top < 0) top = 10;
 
             Canvas.SetTop(_tooltipBorder, top);
             Canvas.SetLeft(_tooltipBorder, left);

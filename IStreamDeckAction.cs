@@ -19,6 +19,7 @@ namespace KOYA_APP
     [JsonDerivedType(typeof(MuteSpeakerAction), typeDiscriminator: "MuteSpeaker")]
     [JsonDerivedType(typeof(SelectMicAction), typeDiscriminator: "SelectMic")]
     [JsonDerivedType(typeof(WebZoomAction), typeDiscriminator: "WebZoom")]
+    [JsonDerivedType(typeof(AppVolumeAction), typeDiscriminator: "AppVolume")]
     public interface IStreamDeckAction
     {
         string Name { get; }
