@@ -60,11 +60,11 @@ namespace KOYA_APP
             DevicesComboBox.Visibility = Visibility.Collapsed;
             ShortcutTextBox.Visibility = Visibility.Collapsed;
 
-            if (selected is SelectMicAction)
+            if (selected is SelectMicAction || selected is MuteMicrophoneAction)
             {
                 ExtraSettingsPanel.Visibility = Visibility.Visible;
                 DevicesComboBox.Visibility = Visibility.Visible;
-                ExtraSettingsTitle.Text = "Wybierz urzadzenie wejsciowe (Mikrofon):";
+                ExtraSettingsTitle.Text = "Wybierz urzadzenie (Mikrofon):";
                 
                 try
                 {
@@ -127,6 +127,11 @@ namespace KOYA_APP
             {
                 var device = DevicesComboBox.SelectedItem as MMDevice;
                 if (device != null) { micAction.DeviceID = device.ID; micAction.DeviceName = device.FriendlyName; SelectedAction = micAction; }
+            }
+            else if (selected is MuteMicrophoneAction muteMicAction)
+            {
+                var device = DevicesComboBox.SelectedItem as MMDevice;
+                if (device != null) { muteMicAction.DeviceId = device.ID; SelectedAction = muteMicAction; }
             }
             else { SelectedAction = selected; }
 
