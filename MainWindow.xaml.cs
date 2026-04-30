@@ -8,6 +8,7 @@ namespace KOYA_APP
     {
         private IStreamDeckAction?[] _buttonActions = new IStreamDeckAction?[14];
         private System.Windows.Forms.NotifyIcon _notifyIcon = null!;
+        private TutorialManager? _tutorialManager;
 
         public MainWindow()
         {
@@ -19,6 +20,7 @@ namespace KOYA_APP
                 InitializeComponent();
                 SetupTrayIcon();
                 LoadAndApplyConfig();
+                SetupTutorial();
             }
             catch (Exception ex)
             {
@@ -27,9 +29,35 @@ namespace KOYA_APP
             }
         }
 
+        private void SetupTutorial()
+        {
+            // Znajdz Grid nadrzedny dla overlay
+            var rootGrid = (Grid)this.Content;
+            _tutorialManager = new TutorialManager(rootGrid);
+
+            // Dodaj kroki
+            var firstButton = FindButtonByTag("0");
+            if (firstButton != null)
+                _tutorialManager.AddStep(firstButton, "Digital Buttons", "These 12 buttons are for digital actions like opening apps, running macros, or system shortcuts.");
+
+            var firstKnob = FindButtonByTag("12");
+            if (firstKnob != null)
+                _tutorialManager.AddStep(firstKnob, "Analog Knobs", "Knobs support MouseWheel events. Perfect for volume control, zooming, or track seeking.");
+
+            var syncBtn = FindLogicalChildren<System.Windows.Controls.Button>(this).FirstOrDefault(b => b.ToolTip?.ToString() == "Sync config with GitHub");
+            if (syncBtn != null)
+                _tutorialManager.AddStep(syncBtn, "GitHub Sync", "Safely backup and sync your configuration to a GitHub repository with one click.");
+        }
+
+        private void Tutorial_Click(object sender, RoutedEventArgs e)
+        {
+            _tutorialManager?.Start();
+        }
+
         private void LoadAndApplyConfig()
         {
-            _buttonActions = ConfigurationManager.LoadConfig();
+            var config = ConfigurationManager.LoadConfig();
+            _buttonActions = config.Actions;
             
             // Odswiez UI dla kazdego przycisku
             for (int i = 0; i < _buttonActions.Length; i++)
@@ -167,9 +195,34 @@ namespace KOYA_APP
             }
         }
 
+        private async void SyncGitHub_Click(object sender, RoutedEventArgs e)
+        {
+            var btn = (System.Windows.Controls.Button)sender;
+            btn.IsEnabled = false;
+            
+            try
+            {
+                var result = await GitService.SyncConfigAsync();
+                
+                if (result.Success)
+                {
+                    _notifyIcon.ShowBalloonTip(3000, "KOYA Sync", result.Message, System.Windows.Forms.ToolTipIcon.Info);
+                }
+                else
+                {
+                    _notifyIcon.ShowBalloonTip(5000, "KOYA Sync Error", result.Message, System.Windows.Forms.ToolTipIcon.Error);
+                    System.Windows.MessageBox.Show(result.Message, "Sync Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+            finally
+            {
+                btn.IsEnabled = true;
+            }
+        }
+
         private void TitleBar_MouseDown(object sender, MouseButtonEventArgs e) { if (e.ChangedButton == MouseButton.Left) this.DragMove(); }
-        private void Close_Click(object sender, RoutedEventArgs e) => this.Hide();       
-        private void Minimize_Click(object sender, RoutedEventArgs e) => this.Hide();
+        private void Close_Click(object sender, RoutedEventArgs e) => this.Hide();
+        private void Minimize_Click(object sender, RoutedEventArgs e) => this.WindowState = WindowState.Minimized;
         
         protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
         {

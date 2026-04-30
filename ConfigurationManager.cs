@@ -3,17 +3,24 @@ using System.Text.Json;
 
 namespace KOYA_APP
 {
+    public class AppConfig
+    {
+        public bool IsFirstStart { get; set; } = true;
+        public IStreamDeckAction?[] Actions { get; set; } = new IStreamDeckAction?[14];
+    }
+
     public static class ConfigurationManager
     {
         private static readonly string ConfigPath = Path.Combine(
             System.AppDomain.CurrentDomain.BaseDirectory, "config.json");
 
-        public static void SaveConfig(IStreamDeckAction?[] actions)
+        public static void SaveConfig(IStreamDeckAction?[] actions, bool isFirstStart = false)
         {
             try
             {
+                var config = new AppConfig { Actions = actions, IsFirstStart = isFirstStart };
                 var options = new JsonSerializerOptions { WriteIndented = true };
-                string json = JsonSerializer.Serialize(actions, options);
+                string json = JsonSerializer.Serialize(config, options);
                 File.WriteAllText(ConfigPath, json);
             }
             catch (System.Exception ex)
@@ -22,20 +29,20 @@ namespace KOYA_APP
             }
         }
 
-        public static IStreamDeckAction?[] LoadConfig()
+        public static AppConfig LoadConfig()
         {
-            if (!File.Exists(ConfigPath)) return new IStreamDeckAction[14];
+            if (!File.Exists(ConfigPath)) return new AppConfig();
 
             try
             {
                 string json = File.ReadAllText(ConfigPath);
-                var actions = JsonSerializer.Deserialize<IStreamDeckAction?[]>(json);
-                return actions ?? new IStreamDeckAction[14];
+                var config = JsonSerializer.Deserialize<AppConfig>(json);
+                return config ?? new AppConfig();
             }
             catch (System.Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Failed to load config: {ex.Message}");
-                return new IStreamDeckAction[14];
+                return new AppConfig();
             }
         }
     }

@@ -33,17 +33,17 @@
                                 </Grid.RenderTransform>
                                 
                                 <!-- Outer Glow (White) -->
-                                <Border x:Name="glow" CornerRadius="0" Opacity="0" Background="White">
+                                <Border x:Name="glow" CornerRadius="8" Opacity="0" Background="White">
                                     <Border.Effect>
                                         <DropShadowEffect BlurRadius="15" ShadowDepth="0" Color="White" Opacity="0.5"/>
                                     </Border.Effect>
                                 </Border>
 
-                                <!-- Main Body (Sharp Corners) -->
+                                <!-- Main Body (Rounded Corners) -->
                                 <Border x:Name="border" Background="{TemplateBinding Background}" 
                                         BorderBrush="{TemplateBinding BorderBrush}" 
                                         BorderThickness="{TemplateBinding BorderThickness}" 
-                                        CornerRadius="0" ClipToBounds="True">
+                                        CornerRadius="8" ClipToBounds="True">
                                     <Grid>
                                         <Rectangle x:Name="sweep" Fill="White" Opacity="0" Width="40" Height="200" HorizontalAlignment="Left" Margin="-100,0,0,0">
                                             <Rectangle.RenderTransform>
@@ -184,26 +184,34 @@
             <Style x:Key="ActionListBoxStyle" TargetType="ListBox">
                 <Setter Property="Background" Value="Transparent"/>
                 <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="ItemsPanel">
+                    <Setter.Value>
+                        <ItemsPanelTemplate>
+                            <WrapPanel IsItemsHost="True" HorizontalAlignment="Center"/>
+                        </ItemsPanelTemplate>
+                    </Setter.Value>
+                </Setter>
                 <Setter Property="ItemContainerStyle">
                     <Setter.Value>
                         <Style TargetType="ListBoxItem">
-                            <Setter Property="Background" Value="Transparent"/>
+                            <Setter Property="Background" Value="#0AFFFFFF"/>
+                            <Setter Property="Margin" Value="8"/>
                             <Setter Property="Template">
                                 <Setter.Value>
                                     <ControlTemplate TargetType="ListBoxItem">
-                                        <Grid>
-                                            <Border x:Name="itemBorder" Background="{TemplateBinding Background}" Padding="15" BorderThickness="0,0,0,1" BorderBrush="#11FFFFFF">
-                                                <ContentPresenter />
-                                            </Border>
-                                            <Rectangle x:Name="marker" HorizontalAlignment="Left" Width="0" Fill="White" Margin="0,10"/>
-                                        </Grid>
+                                        <Border x:Name="itemBorder" Background="{TemplateBinding Background}" 
+                                                BorderThickness="1" BorderBrush="#11FFFFFF"
+                                                Width="140" Height="140" CornerRadius="8">
+                                            <ContentPresenter />
+                                        </Border>
                                         <ControlTemplate.Triggers>
                                             <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter TargetName="itemBorder" Property="Background" Value="#08FFFFFF"/>
+                                                <Setter TargetName="itemBorder" Property="Background" Value="#15FFFFFF"/>
+                                                <Setter TargetName="itemBorder" Property="BorderBrush" Value="#44FFFFFF"/>
                                             </Trigger>
                                             <Trigger Property="IsSelected" Value="True">
-                                                <Setter TargetName="itemBorder" Property="Background" Value="#1AFFFFFF"/>
-                                                <Setter TargetName="marker" Property="Width" Value="4"/>
+                                                <Setter TargetName="itemBorder" Property="Background" Value="#22FFFFFF"/>
+                                                <Setter TargetName="itemBorder" Property="BorderBrush" Value="White"/>
                                                 <Setter Property="Foreground" Value="White"/>
                                             </Trigger>
                                         </ControlTemplate.Triggers>
