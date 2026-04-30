@@ -23,7 +23,7 @@
             <DropShadowEffect x:Name="WindowGlow" BlurRadius="20" ShadowDepth="0" Color="White" Opacity="0.2"/>
         </Border.Effect>
 
-        <Grid>
+        <Grid x:Name="RootGrid">
             <Grid x:Name="MainContent" Opacity="0">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="60"/>
@@ -74,14 +74,6 @@
                                     Content="&#xE995;" FontFamily="{StaticResource IconFont}" Width="100" Height="100" MouseWheel="OnKnobMouseWheel"/>
                         </Viewbox>
                         
-                        <!-- GitHub Sync Button -->
-                        <Viewbox Grid.Row="1" Margin="25">
-                            <Button Style="{StaticResource GlassButtonStyle}" Width="80" Height="80" Click="SyncGitHub_Click"
-                                    ToolTip="Sync config with GitHub" BorderThickness="2">
-                                <TextBlock Text="&#xE895;" FontSize="32" FontFamily="{StaticResource IconFont}"/>
-                            </Button>
-                        </Viewbox>
-
                         <Viewbox Grid.Row="2" Margin="10">
                             <Button Style="{StaticResource KnobButtonStyle}" Tag="13" Click="OnDeckButtonClick" 
                                     Content="&#xE995;" FontFamily="{StaticResource IconFont}" Width="100" Height="100" MouseWheel="OnKnobMouseWheel"/>
