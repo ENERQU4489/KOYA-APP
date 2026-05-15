@@ -1,14 +1,24 @@
+using System;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Controls;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using NAudio.Wave;
+using NAudio.Wave.SampleProviders;
 
 namespace KOYA_APP
 {
     public partial class MainWindow : Window
     {
         private IStreamDeckAction?[] _buttonActions = new IStreamDeckAction?[14];
+        private Dictionary<string, System.Windows.Controls.Button> _buttonCache = new Dictionary<string, System.Windows.Controls.Button>();
         private System.Windows.Forms.NotifyIcon _notifyIcon = null!;
         private TutorialManager? _tutorialManager;
+        private HidBackend _hidBackend = new HidBackend();
+        private Dictionary<int, DateTime> _lastAnalogProcessTime = new Dictionary<int, DateTime>();
 
         public MainWindow()
         {
@@ -18,9 +28,11 @@ namespace KOYA_APP
             try
             {
                 InitializeComponent();
+                CacheButtons();
                 SetupTrayIcon();
                 LoadAndApplyConfig();
                 SetupTutorial();
+                SetupHid();
             }
             catch (Exception ex)
             {
@@ -29,11 +41,213 @@ namespace KOYA_APP
             }
         }
 
+        private bool ShouldProcessAnalog(int index)
+        {
+            if (!_lastAnalogProcessTime.ContainsKey(index))
+            {
+                _lastAnalogProcessTime[index] = DateTime.MinValue;
+            }
+
+            // Ograniczamy do max 50 zdarzeń na sekundę (co 20ms)
+            if ((DateTime.Now - _lastAnalogProcessTime[index]).TotalMilliseconds < 20)
+            {
+                return false;
+            }
+
+            _lastAnalogProcessTime[index] = DateTime.Now;
+            return true;
+        }
+
+        private void CacheButtons()
+        {
+            _buttonCache.Clear();
+            foreach (var btn in FindLogicalChildren<System.Windows.Controls.Button>(this))
+            {
+                if (btn.Tag != null)
+                {
+                    _buttonCache[btn.Tag.ToString()!] = btn;
+                }
+            }
+        }
+
+        private void PlayClickSound()
+        {
+            try
+            {
+                Task.Run(() =>
+                {
+                    using (var waveOut = new NAudio.Wave.WaveOutEvent())
+                    {
+                        var signal = new NAudio.Wave.SampleProviders.SignalGenerator(44100, 1)
+                        {
+                            Type = NAudio.Wave.SampleProviders.SignalGeneratorType.Sin,
+                            Frequency = 1000,
+                            Gain = 0.1
+                        }.Take(TimeSpan.FromMilliseconds(20));
+
+                        waveOut.Init(signal);
+                        waveOut.Play();
+                        while (waveOut.PlaybackState == NAudio.Wave.PlaybackState.Playing)
+                        {
+                            Thread.Sleep(5);
+                        }
+                    }
+                });
+            }
+            catch { }
+        }
+
+        private void OpenPickerForIndex(int index)
+        {
+            if (index < 0 || index >= _buttonActions.Length) return;
+            
+            bool isAnalog = index >= 12;
+            ActionPicker picker = new ActionPicker(isAnalog) { Owner = this };
+            
+            if (picker.ShowDialog() == true)
+            {
+                _buttonActions[index] = picker.SelectedAction!;
+                UpdateButtonUI(index, _buttonActions[index]!);
+                ConfigurationManager.SaveConfig(_buttonActions);
+            }
+        }
+
+        private CancellationTokenSource? _connectionCts;
+
+        private void SetupHid()
+        {
+            _hidBackend.ButtonPressed += (index) =>
+            {
+                System.Windows.Application.Current.Dispatcher.Invoke(async () =>
+                {
+                    if (index >= 0 && index < _buttonActions.Length)
+                    {
+                        var action = _buttonActions[index];
+                        
+                        // 1. Jeśli akcja jest pusta i okno jest widoczne -> otwórz picker
+                        if (action == null && this.IsVisible && this.WindowState != WindowState.Minimized)
+                        {
+                            OpenPickerForIndex(index);
+                            return;
+                        }
+
+                        // 2. Wykonaj akcję
+                        action?.Execute();
+                        PlayClickSound();
+                        
+                        // 3. Wizualny feedback (Podświetlenie)
+                        if (_buttonCache.TryGetValue(index.ToString(), out var btn))
+                        {
+                            var originalBackground = btn.Background;
+                            var highlightBrush = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(120, 255, 255, 255));
+                            btn.Background = highlightBrush;
+                            
+                            var anim = new System.Windows.Media.Animation.ColorAnimation(
+                                System.Windows.Media.Colors.Transparent, 
+                                System.TimeSpan.FromMilliseconds(200));
+                            btn.Background.BeginAnimation(System.Windows.Media.SolidColorBrush.ColorProperty, anim);
+                            
+                            await System.Threading.Tasks.Task.Delay(200);
+                            btn.Background = originalBackground;
+                        }
+                    }
+                });
+            };
+
+            _hidBackend.KnobTurned += (index, direction) =>
+            {
+                // Throttling: Nie przetwarzaj gałek częściej niż co 20ms dla tego samego indeksu
+                // To zapobiega "zalaniu" wątku UI i backendu przy bardzo szybkich obrotach
+                if (!ShouldProcessAnalog(index)) return;
+
+                System.Windows.Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    if (index >= 0 && index < _buttonActions.Length)
+                    {
+                        var action = _buttonActions[index];
+
+                        if (action == null && this.IsVisible && this.WindowState != WindowState.Minimized)
+                        {
+                            OpenPickerForIndex(index);
+                            return;
+                        }
+
+                        action?.ExecuteAnalog(direction);
+                        
+                        // Feedback wizualny tylko jeśli okno jest widoczne i nie za często
+                        if (this.IsVisible && _buttonCache.TryGetValue(index.ToString(), out var btn))
+                        {
+                             var originalBrush = btn.BorderBrush;
+                             btn.BorderBrush = System.Windows.Media.Brushes.White;
+                             System.Threading.Tasks.Task.Delay(100).ContinueWith(_ => 
+                                System.Windows.Application.Current.Dispatcher.BeginInvoke(new Action(() => btn.BorderBrush = originalBrush)));
+                        }
+                    }
+                }));
+            };
+
+            _hidBackend.ConnectionStatusChanged += (isConnected) =>
+            {
+                System.Windows.Application.Current.Dispatcher.Invoke(async () =>
+                {
+                    _connectionCts?.Cancel();
+                    _connectionCts = new CancellationTokenSource();
+                    var token = _connectionCts.Token;
+
+                    if (!isConnected)
+                    {
+                        try 
+                        { 
+                            // Czekamy 500ms przed pokazaniem overlay (stabilizacja)
+                            await System.Threading.Tasks.Task.Delay(500, token); 
+                            UpdateStatusUI(false);
+                        } 
+                        catch (OperationCanceledException) { }
+                    }
+                    else
+                    {
+                        UpdateStatusUI(true);
+                    }
+                });
+            };
+
+            _hidBackend.Start();
+        }
+
+        private void UpdateStatusUI(bool isConnected)
+        {
+            var statusDot = this.FindName("StatusDot") as System.Windows.Shapes.Ellipse;
+            var statusText = this.FindName("StatusText") as TextBlock;
+            var disconnectedOverlay = this.FindName("DisconnectedOverlay") as Grid;
+
+            if (statusDot != null)
+                statusDot.Fill = isConnected ? System.Windows.Media.Brushes.White : System.Windows.Media.Brushes.DimGray;
+            
+            if (statusText != null)
+                statusText.Text = isConnected ? "CONNECTED" : "DISCONNECTED";
+
+            if (disconnectedOverlay != null)
+                disconnectedOverlay.Visibility = isConnected ? Visibility.Collapsed : Visibility.Visible;
+        }
+
+        private void ClearAction(int index)
+        {
+            if (index < 0 || index >= _buttonActions.Length) return;
+            
+            _buttonActions[index] = null;
+            var btn = FindButtonByTag(index.ToString());
+            if (btn != null)
+            {
+                btn.Content = index >= 12 ? "\uE995;" : "\uE710;"; // Reset ikony na "+" lub "Knob"
+                btn.ToolTip = "Kliknij aby przypisać akcję";
+            }
+            ConfigurationManager.SaveConfig(_buttonActions);
+        }
+
         private void SetupTutorial()
         {
             _tutorialManager = new TutorialManager(RootGrid);
 
-            // Bardziej szczegółowe kroki po polsku
             _tutorialManager.AddStep(this, "Witaj w KOYA!", "Ten krótki przewodnik pokaże Ci, jak skonfigurować Twoją konsolę sterowania.");
 
             var firstButton = FindButtonByTag("0");
@@ -60,7 +274,6 @@ namespace KOYA_APP
             var config = ConfigurationManager.LoadConfig();
             _buttonActions = config.Actions;
             
-            // Odswiez UI dla kazdego przycisku
             for (int i = 0; i < _buttonActions.Length; i++)
             {
                 if (_buttonActions[i] != null)
@@ -93,13 +306,11 @@ namespace KOYA_APP
                 catch { }
             }
             
-            // Standardowa ikona z czcionki
             btn.Content = action.Icon;
         }
 
         private System.Windows.Controls.Button? FindButtonByTag(string tag)
         {
-            // Przeszukaj cale drzewo wizualne w poszukiwaniu przycisku z danym tagiem
             return FindLogicalChildren<System.Windows.Controls.Button>(this)
                 .FirstOrDefault(b => b.Tag?.ToString() == tag);
         }
@@ -145,9 +356,25 @@ namespace KOYA_APP
             _notifyIcon.Text = "KOYA";
             _notifyIcon.DoubleClick += (s, e) => ShowWindow();
 
-            var contextMenu = new System.Windows.Forms.ContextMenuStrip();
-            contextMenu.Items.Add("POKAZ", null, (s, e) => ShowWindow());
-            contextMenu.Items.Add("WYJDZ", null, (s, e) => ShutdownApp());
+            var contextMenu = new System.Windows.Forms.ContextMenuStrip
+            {
+                BackColor = System.Drawing.Color.FromArgb(20, 20, 20),
+                ForeColor = System.Drawing.Color.White,
+                ShowImageMargin = false,
+                RenderMode = System.Windows.Forms.ToolStripRenderMode.System,
+                Font = new System.Drawing.Font("Segoe UI", 9f)
+            };
+
+            var showItem = new System.Windows.Forms.ToolStripMenuItem("Pokaż Konsole");
+            showItem.Click += (s, e) => ShowWindow();
+            
+            var exitItem = new System.Windows.Forms.ToolStripMenuItem("Zakończ KOYA");
+            exitItem.Click += (s, e) => ShutdownApp();
+
+            contextMenu.Items.Add(showItem);
+            contextMenu.Items.Add(new System.Windows.Forms.ToolStripSeparator { BackColor = System.Drawing.Color.FromArgb(40, 40, 40) });
+            contextMenu.Items.Add(exitItem);
+
             _notifyIcon.ContextMenuStrip = contextMenu;
         }
 
@@ -156,7 +383,7 @@ namespace KOYA_APP
             this.Show();
             this.WindowState = WindowState.Normal;
             this.Activate();
-            this.Topmost = true; // Upewniamy sie ze wskoczy na wierzch
+            this.Topmost = true;
         }
 
         private void OnDeckButtonClick(object sender, RoutedEventArgs e)
@@ -167,30 +394,27 @@ namespace KOYA_APP
             if (!int.TryParse(btn.Tag.ToString(), out int index)) return;
             if (index < 0 || index >= _buttonActions.Length) return;
 
-            if (_buttonActions[index] == null)
+            var action = _buttonActions[index];
+            if (action == null)
             {
-                bool isAnalog = index >= 12;
-                ActionPicker picker = new ActionPicker(isAnalog) { Owner = this };
-                if (picker.ShowDialog() == true)
-                {
-                    _buttonActions[index] = picker.SelectedAction!;
-                    UpdateButtonUI(index, _buttonActions[index]!);
-                    ConfigurationManager.SaveConfig(_buttonActions);
-                }
+                OpenPickerForIndex(index);
             }
             else
             {
-                // Jesli to galka (analog), klikniecie zwykle nic nie robi lub wywoluje Execute()
-                // Upewniamy sie, ze Execute() nie rzuca wyjatkiem dla akcji analogowych
-                try 
-                {
-                    _buttonActions[index]?.Execute();
-                }
-                catch (Exception ex)
-                {
-                    System.Diagnostics.Debug.WriteLine($"Action execution failed: {ex.Message}");
-                }
+                action.Execute();
+                PlayClickSound();
             }
+        }
+
+        private void OnDeckButtonRightClick(object sender, MouseButtonEventArgs e)
+        {
+            System.Windows.Controls.Button btn = (System.Windows.Controls.Button)sender;
+            if (btn.Tag == null) return;
+
+            if (!int.TryParse(btn.Tag.ToString(), out int index)) return;
+            if (index < 0 || index >= _buttonActions.Length) return;
+
+            OpenPickerForIndex(index);
         }
 
         private void OnKnobMouseWheel(object sender, MouseWheelEventArgs e)

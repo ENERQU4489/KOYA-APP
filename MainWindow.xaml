@@ -9,11 +9,7 @@
     <Border x:Name="WindowBorder" CornerRadius="12" BorderThickness="1.5" 
             TextElement.FontFamily="{StaticResource MainFont}" TextElement.Foreground="White">
         <Border.Background>
-            <RadialGradientBrush Center="0.8,0.2" GradientOrigin="0.8,0.2" RadiusX="1.2" RadiusY="1.2">
-                <GradientStop Color="#111111" Offset="0"/>
-                <GradientStop Color="#050505" Offset="0.6"/>
-                <GradientStop Color="Black" Offset="1"/>
-            </RadialGradientBrush>
+            <SolidColorBrush Color="#000000"/>
         </Border.Background>
         
         <Border.BorderBrush>
@@ -25,6 +21,39 @@
         </Border.Effect>
 
         <Grid x:Name="RootGrid">
+            <!-- Animated Background Layer -->
+            <Canvas x:Name="BackgroundCanvas" IsHitTestVisible="False">
+                <Ellipse x:Name="Blob1" Width="400" Height="400" Fill="#15FFFFFF">
+                    <Ellipse.Effect>
+                        <BlurEffect Radius="150"/>
+                    </Ellipse.Effect>
+                    <Ellipse.RenderTransform>
+                        <TranslateTransform X="-200" Y="-200"/>
+                    </Ellipse.RenderTransform>
+                </Ellipse>
+                <Ellipse x:Name="Blob2" Width="500" Height="500" Fill="#0AFFFFFF">
+                    <Ellipse.Effect>
+                        <BlurEffect Radius="200"/>
+                    </Ellipse.Effect>
+                    <Ellipse.RenderTransform>
+                        <TranslateTransform X="600" Y="300"/>
+                    </Ellipse.RenderTransform>
+                </Ellipse>
+                
+                <Canvas.Triggers>
+                    <EventTrigger RoutedEvent="Canvas.Loaded">
+                        <BeginStoryboard>
+                            <Storyboard RepeatBehavior="Forever" AutoReverse="True">
+                                <DoubleAnimation Storyboard.TargetName="Blob1" Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.X)" To="800" Duration="0:0:30"/>
+                                <DoubleAnimation Storyboard.TargetName="Blob1" Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)" To="400" Duration="0:0:25"/>
+                                <DoubleAnimation Storyboard.TargetName="Blob2" Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.X)" To="-300" Duration="0:0:40"/>
+                                <DoubleAnimation Storyboard.TargetName="Blob2" Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)" To="-100" Duration="0:0:35"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </EventTrigger>
+                </Canvas.Triggers>
+            </Canvas>
+
             <!-- Main Content Container with Rounding -->
             <Border x:Name="MainContentBorder" CornerRadius="12" ClipToBounds="True">
                 <Grid x:Name="MainContent" Opacity="0">
@@ -46,7 +75,16 @@
                                     <DropShadowEffect BlurRadius="10" Color="White" ShadowDepth="0" Opacity="0.3"/>
                                 </TextBlock.Effect>
                             </TextBlock>
-                            <TextBlock Text="Virtual Console" Foreground="#66FFFFFF" FontSize="12" FontFamily="{StaticResource MainFont}" Margin="12,0,0,0" VerticalAlignment="Bottom" Padding="0,0,0,4"/>
+                            
+                            <!-- HID Connection Status Indicator -->
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="30,5,0,0">
+                                <Ellipse x:Name="StatusDot" Width="10" Height="10" Fill="#44FFFFFF" Margin="0,2,8,0">
+                                    <Ellipse.Effect>
+                                        <DropShadowEffect BlurRadius="8" ShadowDepth="0" Color="White" Opacity="0.6"/>
+                                    </Ellipse.Effect>
+                                </Ellipse>
+                                <TextBlock x:Name="StatusText" Text="DISCONNECTED" Foreground="#66FFFFFF" FontSize="12" FontWeight="Bold" VerticalAlignment="Center"/>
+                            </StackPanel>
                         </StackPanel>
 
                         <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="20,0">
@@ -64,18 +102,18 @@
 
                         <!-- Buttons Grid -->
                         <UniformGrid Grid.Column="0" Rows="3" Columns="4">
-                            <Button Style="{StaticResource GlassButtonStyle}" Tag="0" Click="OnDeckButtonClick" Content="&#xE710;" Margin="8"/>
-                            <Button Style="{StaticResource GlassButtonStyle}" Tag="1" Click="OnDeckButtonClick" Content="&#xE710;" Margin="8"/>
-                            <Button Style="{StaticResource GlassButtonStyle}" Tag="2" Click="OnDeckButtonClick" Content="&#xE710;" Margin="8"/>
-                            <Button Style="{StaticResource GlassButtonStyle}" Tag="3" Click="OnDeckButtonClick" Content="&#xE710;" Margin="8"/>
-                            <Button Style="{StaticResource GlassButtonStyle}" Tag="4" Click="OnDeckButtonClick" Content="&#xE710;" Margin="8"/>
-                            <Button Style="{StaticResource GlassButtonStyle}" Tag="5" Click="OnDeckButtonClick" Content="&#xE710;" Margin="8"/>
-                            <Button Style="{StaticResource GlassButtonStyle}" Tag="6" Click="OnDeckButtonClick" Content="&#xE710;" Margin="8"/>
-                            <Button Style="{StaticResource GlassButtonStyle}" Tag="7" Click="OnDeckButtonClick" Content="&#xE710;" Margin="8"/>
-                            <Button Style="{StaticResource GlassButtonStyle}" Tag="8" Click="OnDeckButtonClick" Content="&#xE710;" Margin="8"/>
-                            <Button Style="{StaticResource GlassButtonStyle}" Tag="9" Click="OnDeckButtonClick" Content="&#xE710;" Margin="8"/>
-                            <Button Style="{StaticResource GlassButtonStyle}" Tag="10" Click="OnDeckButtonClick" Content="&#xE710;" Margin="8"/>
-                            <Button Style="{StaticResource GlassButtonStyle}" Tag="11" Click="OnDeckButtonClick" Content="&#xE710;" Margin="8"/>
+                            <Button Style="{StaticResource GlassButtonStyle}" Tag="0" Click="OnDeckButtonClick" MouseRightButtonUp="OnDeckButtonRightClick" Content="&#xE710;" Margin="8"/>
+                            <Button Style="{StaticResource GlassButtonStyle}" Tag="1" Click="OnDeckButtonClick" MouseRightButtonUp="OnDeckButtonRightClick" Content="&#xE710;" Margin="8"/>
+                            <Button Style="{StaticResource GlassButtonStyle}" Tag="2" Click="OnDeckButtonClick" MouseRightButtonUp="OnDeckButtonRightClick" Content="&#xE710;" Margin="8"/>
+                            <Button Style="{StaticResource GlassButtonStyle}" Tag="3" Click="OnDeckButtonClick" MouseRightButtonUp="OnDeckButtonRightClick" Content="&#xE710;" Margin="8"/>
+                            <Button Style="{StaticResource GlassButtonStyle}" Tag="4" Click="OnDeckButtonClick" MouseRightButtonUp="OnDeckButtonRightClick" Content="&#xE710;" Margin="8"/>
+                            <Button Style="{StaticResource GlassButtonStyle}" Tag="5" Click="OnDeckButtonClick" MouseRightButtonUp="OnDeckButtonRightClick" Content="&#xE710;" Margin="8"/>
+                            <Button Style="{StaticResource GlassButtonStyle}" Tag="6" Click="OnDeckButtonClick" MouseRightButtonUp="OnDeckButtonRightClick" Content="&#xE710;" Margin="8"/>
+                            <Button Style="{StaticResource GlassButtonStyle}" Tag="7" Click="OnDeckButtonClick" MouseRightButtonUp="OnDeckButtonRightClick" Content="&#xE710;" Margin="8"/>
+                            <Button Style="{StaticResource GlassButtonStyle}" Tag="8" Click="OnDeckButtonClick" MouseRightButtonUp="OnDeckButtonRightClick" Content="&#xE710;" Margin="8"/>
+                            <Button Style="{StaticResource GlassButtonStyle}" Tag="9" Click="OnDeckButtonClick" MouseRightButtonUp="OnDeckButtonRightClick" Content="&#xE710;" Margin="8"/>
+                            <Button Style="{StaticResource GlassButtonStyle}" Tag="10" Click="OnDeckButtonClick" MouseRightButtonUp="OnDeckButtonRightClick" Content="&#xE710;" Margin="8"/>
+                            <Button Style="{StaticResource GlassButtonStyle}" Tag="11" Click="OnDeckButtonClick" MouseRightButtonUp="OnDeckButtonRightClick" Content="&#xE710;" Margin="8"/>
                         </UniformGrid>
 
                         <!-- Knobs Column -->
@@ -87,18 +125,35 @@
                             </Grid.RowDefinitions>
                             
                             <Viewbox Grid.Row="0" Margin="10">
-                                <Button Style="{StaticResource KnobButtonStyle}" Tag="12" Click="OnDeckButtonClick" 
+                                <Button Style="{StaticResource KnobButtonStyle}" Tag="12" Click="OnDeckButtonClick" MouseRightButtonUp="OnDeckButtonRightClick" 
                                         Content="&#xE995;" Width="100" Height="100" MouseWheel="OnKnobMouseWheel"/>
                             </Viewbox>
                             
                             <Viewbox Grid.Row="2" Margin="10">
-                                <Button Style="{StaticResource KnobButtonStyle}" Tag="13" Click="OnDeckButtonClick" 
+                                <Button Style="{StaticResource KnobButtonStyle}" Tag="13" Click="OnDeckButtonClick" MouseRightButtonUp="OnDeckButtonRightClick" 
                                         Content="&#xE995;" Width="100" Height="100" MouseWheel="OnKnobMouseWheel"/>
                             </Viewbox>
                         </Grid>
                     </Grid>
                 </Grid>
             </Border>
+
+            <!-- Disconnection Overlay -->
+            <Grid x:Name="DisconnectedOverlay" Background="#EE000000" Visibility="Visible">
+                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                    <TextBlock Text="&#xE7BA;" FontFamily="{StaticResource IconFont}" FontSize="64" Foreground="White" HorizontalAlignment="Center" Margin="0,0,0,20">
+                        <TextBlock.Effect>
+                            <DropShadowEffect BlurRadius="20" Color="White" Opacity="0.5"/>
+                        </TextBlock.Effect>
+                    </TextBlock>
+                    <TextBlock Text="PLEASE CONNECT" Foreground="White" FontSize="28" FontWeight="Bold" FontFamily="{StaticResource MainFont}" HorizontalAlignment="Center"/>
+                    <TextBlock Text="KOYA STREAM DECK" Foreground="#88FFFFFF" FontSize="14" FontFamily="{StaticResource MainFont}" HorizontalAlignment="Center" Margin="0,5,0,0"/>
+                    
+                    <Border BorderBrush="#33FFFFFF" BorderThickness="1" CornerRadius="4" Padding="20,10" Margin="0,40,0,0" HorizontalAlignment="Center">
+                        <TextBlock Text="WAITING FOR HARDWARE" Foreground="#44FFFFFF" FontSize="10" FontFamily="{StaticResource MainFont}"/>
+                    </Border>
+                </StackPanel>
+            </Grid>
 
             <!-- Startup Intro Overlay -->
             <Grid x:Name="IntroOverlay" Background="Black">

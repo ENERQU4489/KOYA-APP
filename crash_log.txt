@@ -1,29 +1,18 @@
-System.Windows.Markup.XamlParseException: The invocation of the constructor on type 'KOYA_APP.MainWindow' that matches the specified binding constraints threw an exception.
- ---> System.InvalidCastException: Unable to cast object of type 'System.Windows.Controls.Border' to type 'System.Windows.Controls.Grid'.
-   at KOYA_APP.MainWindow.SetupTutorial() in C:\Users\micha\Desktop\GEMINI\20 Projects\KOYA-APP\MainWindow.xaml.cs:line 35
-   at KOYA_APP.MainWindow..ctor() in C:\Users\micha\Desktop\GEMINI\20 Projects\KOYA-APP\MainWindow.xaml.cs:line 23
-   at System.RuntimeType.CreateInstanceDefaultCtor(Boolean publicOnly, Boolean wrapExceptions)
-   --- End of inner exception stack trace ---
-   at System.Windows.Markup.XamlReader.RewrapException(Exception e, IXamlLineInfo lineInfo, Uri baseUri)
-   at System.Windows.Markup.WpfXamlLoader.Load(XamlReader xamlReader, IXamlObjectWriterFactory writerFactory, Boolean skipJournaledProperties, Object rootObject, XamlObjectWriterSettings settings, Uri baseUri)
-   at System.Windows.Markup.WpfXamlLoader.LoadBaml(XamlReader xamlReader, Boolean skipJournaledProperties, Object rootObject, XamlAccessLevel accessLevel, Uri baseUri)
-   at System.Windows.Markup.XamlReader.LoadBaml(Stream stream, ParserContext parserContext, Object parent, Boolean closeStream)
-   at System.Windows.Application.LoadBamlStreamWithSyncInfo(Stream stream, ParserContext pc)
-   at System.Windows.Application.DoStartup()
-   at System.Windows.Application.<.ctor>b__1_0(Object unused)
-   at System.Windows.Threading.ExceptionWrapper.InternalRealCall(Delegate callback, Object args, Int32 numArgs)
-   at System.Windows.Threading.ExceptionWrapper.TryCatchWhen(Object source, Delegate callback, Object args, Int32 numArgs, Delegate catchHandler)
-   at System.Windows.Threading.DispatcherOperation.InvokeImpl()
-   at MS.Internal.CulturePreservingExecutionContext.CallbackWrapper(Object obj)
-   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
---- End of stack trace from previous location ---
-   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
-   at MS.Internal.CulturePreservingExecutionContext.Run(CulturePreservingExecutionContext executionContext, ContextCallback callback, Object state)
-   at System.Windows.Threading.DispatcherOperation.Invoke()
-   at System.Windows.Threading.Dispatcher.ProcessQueue()
-   at System.Windows.Threading.Dispatcher.WndProcHook(IntPtr hwnd, Int32 msg, IntPtr wParam, IntPtr lParam, Boolean& handled)
+System.InvalidOperationException: The specified Visual is not an ancestor of this Visual.
+   at System.Windows.Media.Visual.TrySimpleTransformToAncestor(Visual ancestor, Boolean inverse, GeneralTransform& generalTransform, Matrix& simpleTransform)
+   at System.Windows.Media.Visual.TransformToAncestor(Visual ancestor)
+   at KOYA_APP.TutorialManager.ShowCurrentStep() in C:\Users\micha\Desktop\GEMINI\20 Projects\KOYA-APP\TutorialManager.cs:line 75
+   at KOYA_APP.TutorialManager.NextStep() in C:\Users\micha\Desktop\GEMINI\20 Projects\KOYA-APP\TutorialManager.cs:line 65
+   at KOYA_APP.TutorialManager.<.ctor>b__8_0(Object s, MouseButtonEventArgs e) in C:\Users\micha\Desktop\GEMINI\20 Projects\KOYA-APP\TutorialManager.cs:line 40
+   at System.Windows.RoutedEventArgs.InvokeHandler(Delegate handler, Object target)
+   at System.Windows.EventRoute.InvokeHandlersImpl(Object source, RoutedEventArgs args, Boolean reRaised)
+   at System.Windows.UIElement.RaiseEventImpl(DependencyObject sender, RoutedEventArgs args)
+   at System.Windows.UIElement.RaiseTrustedEvent(RoutedEventArgs args)
+   at System.Windows.Input.InputManager.ProcessStagingArea()
+   at System.Windows.Interop.HwndMouseInputProvider.ReportInput(IntPtr hwnd, InputMode mode, Int32 timestamp, RawMouseActions actions, Int32 x, Int32 y, Int32 wheel)
+   at System.Windows.Interop.HwndMouseInputProvider.FilterMessage(IntPtr hwnd, WindowMessage msg, IntPtr wParam, IntPtr lParam, Boolean& handled)
+   at System.Windows.Interop.HwndSource.InputFilterMessage(IntPtr hwnd, Int32 msg, IntPtr wParam, IntPtr lParam, Boolean& handled)
    at MS.Win32.HwndWrapper.WndProc(IntPtr hwnd, Int32 msg, IntPtr wParam, IntPtr lParam, Boolean& handled)
-   at MS.Win32.HwndSubclass.DispatcherCallbackOperation(Object o)
    at System.Windows.Threading.ExceptionWrapper.InternalRealCall(Delegate callback, Object args, Int32 numArgs)
    at System.Windows.Threading.ExceptionWrapper.TryCatchWhen(Object source, Delegate callback, Object args, Int32 numArgs, Delegate catchHandler)
    at System.Windows.Threading.Dispatcher.LegacyInvokeImpl(DispatcherPriority priority, TimeSpan timeout, Delegate method, Object args, Int32 numArgs)

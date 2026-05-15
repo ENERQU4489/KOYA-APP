@@ -482,3 +482,9 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
+
+# KOYA-APP Specific
+crash_log.txt
+crash_init_log.txt
+*.lscache
+config.json

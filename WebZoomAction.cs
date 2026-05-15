@@ -4,9 +4,9 @@ namespace KOYA_APP
 {
     public class WebZoomAction : IStreamDeckAction
     {
-        public string Name => "ZOOM";
+        public string Name => "Powiekszenie";
         public string Icon => "\uE1A3";
-        public string Description => "Web/App Zoom Control";
+        public string Description => "Kontrola powiekszenia (Zoom)";
 
         public void Execute() { keybd_event(0x11, 0, 0, 0); keybd_event(0x30, 0, 0, 0); keybd_event(0x30, 0, 2, 0); keybd_event(0x11, 0, 2, 0); }
         public void ExecuteAnalog(bool direction) { keybd_event(0x11, 0, 0, 0); uint d = direction ? (uint)120 : unchecked((uint)-120); mouse_event(0x0800, 0, 0, d, 0); keybd_event(0x11, 0, 2, 0); }
