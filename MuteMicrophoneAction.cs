@@ -4,9 +4,9 @@ namespace KOYA_APP
 {
     public class MuteMicrophoneAction : IStreamDeckAction
     {
-        public string Name => "MIC MUTE";
+        public string Name => "Wycisz Mikrofon";
         public string Icon => "\uE1D6";
-        public string Description => "Toggle Microphone";
+        public string Description => "Przelacz mikrofon (Wl/Wyl)";
 
         public string? DeviceId { get; set; }
 

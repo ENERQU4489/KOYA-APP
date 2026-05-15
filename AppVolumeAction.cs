@@ -5,9 +5,9 @@ namespace KOYA_APP
 {
     public class AppVolumeAction : IStreamDeckAction
     {
-        public string Name { get; set; } = "App Volume";
+        public string Name { get; set; } = "Glosnosc Aplikacji";
         public string Icon => "\uE767";
-        public string Description { get; set; } = "Control volume for a specific app";
+        public string Description { get; set; } = "Kontroluj glosnosc konkretnej aplikacji";
         
         public int ProcessId { get; set; }
         public string AppName { get; set; } = "Unknown";

@@ -2,16 +2,16 @@ using System.Runtime.InteropServices;
 
 namespace KOYA_APP
 {
-    public class NextTrackAction : IStreamDeckAction
+    public class BrowserForwardAction : IStreamDeckAction
     {
-        public string Name => "Nastepny Utwor";
-        public string Icon => "\uE101";
-        public string Description => "Przelacza utwor";
+        public string Name => "Dalej (WWW)";
+        public string Icon => "\uE72A";
+        public string Description => "Następna strona w przeglądarce";
 
         public void Execute()
         {
-            keybd_event(0xB0, 0, 0, 0);
-            keybd_event(0xB0, 0, 2, 0);
+            keybd_event(0xA7, 0, 0, 0);
+            keybd_event(0xA7, 0, 2, 0);
         }
 
         public void ExecuteAnalog(bool direction) { }

@@ -6,6 +6,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Diagnostics;
+using System;
 
 namespace KOYA_APP
 {
@@ -24,6 +25,7 @@ namespace KOYA_APP
                 new NextTrackAction(),
                 new PreviousTrackAction(),
                 new VolumeAction(),
+                new BrightnessAction(),
                 new CopyAction(),
                 new PasteAction(),
                 new ScreenshotAction(),
@@ -32,25 +34,38 @@ namespace KOYA_APP
                 new FullscreenAction(),
                 new AltTabAction(),
                 new CustomShortcutAction(),
+                new PowerShellAction(),
+                new PasteTextAction(),
                 new OpenAppAction(),
+                new OpenLinkAction(),
+                new BrowserBackAction(),
+                new BrowserForwardAction(),
+                new BrowserRefreshAction(),
+                new CreateFolderAction(),
+                new MultiAction(),
+                new ShutdownAction(),
                 new MuteMicrophoneAction(),
                 new MuteSpeakerAction(),
                 new SelectMicAction(),
                 new WebZoomAction(),
-                new AppVolumeAction()
+                new AppVolumeAction(),
+                new SpotifyLikeAction(),
+                new SpotifyOpenAction(),
+                new MacroAction()
             };
 
             if (isAnalog)
             {
                 ActionsListBox.ItemsSource = allActions.Where(a => 
                     a is VolumeAction || 
+                    a is BrightnessAction ||
                     a is MuteMicrophoneAction || 
                     a is WebZoomAction || 
                     a is AppVolumeAction).ToList();
             }
             else
             {
-                ActionsListBox.ItemsSource = allActions;
+                ActionsListBox.ItemsSource = allActions.Where(a => !(a is BrightnessAction)).ToList();
             }
         }
 
@@ -60,6 +75,7 @@ namespace KOYA_APP
             ExtraSettingsPanel.Visibility = Visibility.Collapsed;
             DevicesComboBox.Visibility = Visibility.Collapsed;
             ShortcutTextBox.Visibility = Visibility.Collapsed;
+            PasteTextInput.Visibility = Visibility.Collapsed;
 
             if (selected is SelectMicAction || selected is MuteMicrophoneAction)
             {
@@ -88,6 +104,41 @@ namespace KOYA_APP
                 {
                     ExtraSettingsTitle.Text = "BLAD AUDIO: " + ex.Message;
                     DevicesComboBox.IsEnabled = false;
+                }
+            }
+            else if (selected is BrightnessAction)
+            {
+                ExtraSettingsPanel.Visibility = Visibility.Visible;
+                DevicesComboBox.Visibility = Visibility.Visible;
+                ExtraSettingsTitle.Text = "Wybierz ekran do sterowania:";
+
+                try
+                {
+                    var monitors = new List<KeyValuePair<string, string>>();
+                    using (var searcher = new System.Management.ManagementObjectSearcher(@"root\wmi", "SELECT * FROM WmiMonitorID"))
+                    {
+                        foreach (System.Management.ManagementObject obj in searcher.Get())
+                        {
+                            var nameBytes = obj["UserFriendlyName"] as ushort[];
+                            var name = nameBytes != null ? new string(nameBytes.Select(b => (char)b).ToArray()).TrimEnd('\0') : "Monitor";
+                            var instanceName = obj["InstanceName"]?.ToString() ?? "Unknown";
+                            monitors.Add(new KeyValuePair<string, string>(instanceName, name));
+                        }
+                    }
+
+                    if (monitors.Count == 0)
+                    {
+                        monitors.Add(new KeyValuePair<string, string>("", "Domyślny Monitor"));
+                    }
+
+                    DevicesComboBox.DisplayMemberPath = "Value";
+                    DevicesComboBox.ItemsSource = monitors;
+                    DevicesComboBox.SelectedIndex = 0;
+                    DevicesComboBox.IsEnabled = true;
+                }
+                catch (System.Exception ex)
+                {
+                    ExtraSettingsTitle.Text = "BLAD WMI: " + ex.Message;
                 }
             }
             else if (selected is AppVolumeAction)
@@ -139,6 +190,106 @@ namespace KOYA_APP
                 _capturedKeys.Clear();
                 ShortcutTextBox.Text = "Kliknij tutaj i wcisnij klawisze...";
             }
+            else if (selected is PasteTextAction pt)
+            {
+                ExtraSettingsPanel.Visibility = Visibility.Visible;
+                PasteTextInput.Visibility = Visibility.Visible;
+                ExtraSettingsTitle.Text = "Wpisz tekst do wklejenia:";
+                PasteTextInput.Text = pt.TextToPaste;
+            }
+            else if (selected is OpenLinkAction ol)
+            {
+                ExtraSettingsPanel.Visibility = Visibility.Visible;
+                PasteTextInput.Visibility = Visibility.Visible;
+                ExtraSettingsTitle.Text = "Wpisz adres URL (np. https://google.com):";
+                PasteTextInput.Text = ol.Url;
+            }
+            else if (selected is CreateFolderAction cf)
+            {
+                ExtraSettingsPanel.Visibility = Visibility.Visible;
+                PasteTextInput.Visibility = Visibility.Visible;
+                ExtraSettingsTitle.Text = "Wpisz ścieżkę folderu lub wybierz po kliknięciu Zastosuj:";
+                PasteTextInput.Text = cf.FolderPath;
+            }
+            else if (selected is PowerShellAction ps)
+            {
+                ExtraSettingsPanel.Visibility = Visibility.Visible;
+                PasteTextInput.Visibility = Visibility.Visible;
+                ExtraSettingsTitle.Text = "Wpisz komende lub sciezke do skryptu (.ps1):";
+                PasteTextInput.Text = ps.ScriptContent;
+            }
+            else if (selected is MacroAction)
+            {
+                ExtraSettingsPanel.Visibility = Visibility.Visible;
+                MacroPanel.Visibility = Visibility.Visible;
+                ExtraSettingsTitle.Text = "Nagraj sekwencję klawiszy:";
+                _macroSteps.Clear();
+                MacroStatusText.Text = "GOTOWY DO NAGRYWANIA";
+            }
+        }
+
+        private List<MacroStep> _macroSteps = new List<MacroStep>();
+        private bool _isRecordingMacro = false;
+        private DateTime _lastMacroEventTime;
+
+        private void RecordMacro_Click(object sender, RoutedEventArgs e)
+        {
+            if (!_isRecordingMacro)
+            {
+                _isRecordingMacro = true;
+                _macroSteps.Clear();
+                _lastMacroEventTime = DateTime.Now;
+                RecordMacroButtonText.Text = "STOP";
+                MacroStatusText.Text = "NAGRYWANIE... (Wciskaj klawisze)";
+                this.PreviewKeyDown += ActionPicker_PreviewKeyDown;
+                this.PreviewKeyUp += ActionPicker_PreviewKeyUp;
+            }
+            else
+            {
+                StopRecording();
+            }
+        }
+
+        private void StopRecording()
+        {
+            _isRecordingMacro = false;
+            RecordMacroButtonText.Text = "NAGRAJ";
+            MacroStatusText.Text = $"ZAPISANO {_macroSteps.Count} KROKÓW";
+            this.PreviewKeyDown -= ActionPicker_PreviewKeyDown;
+            this.PreviewKeyUp -= ActionPicker_PreviewKeyUp;
+        }
+
+        private void ActionPicker_PreviewKeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if (!_isRecordingMacro) return;
+            e.Handled = true;
+            AddMacroStep(e.Key, true);
+        }
+
+        private void ActionPicker_PreviewKeyUp(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if (!_isRecordingMacro) return;
+            e.Handled = true;
+            AddMacroStep(e.Key, false);
+        }
+
+        private void AddMacroStep(Key key, bool isDown)
+        {
+            int vk = KeyInterop.VirtualKeyFromKey(key);
+            if (vk == 0) return;
+
+            var now = DateTime.Now;
+            int delay = (int)(now - _lastMacroEventTime).TotalMilliseconds;
+            _lastMacroEventTime = now;
+
+            _macroSteps.Add(new MacroStep
+            {
+                KeyCode = (byte)vk,
+                IsKeyDown = isDown,
+                DelayMs = delay
+            });
+
+            MacroStatusText.Text = $"NAGRYWANIE: {_macroSteps.Count} KROKÓW...";
         }
 
         private void ShortcutTextBox_PreviewKeyDown(object sender, System.Windows.Input.KeyEventArgs e)
@@ -185,6 +336,87 @@ namespace KOYA_APP
                     appVolAction.AppName = app.Name;
                     appVolAction.Name = $"VOL: {app.Name}";
                     SelectedAction = appVolAction;
+                }
+            }
+            else if (selected is BrightnessAction brightAction)
+            {
+                if (DevicesComboBox.SelectedItem is KeyValuePair<string, string> monitor)
+                {
+                    brightAction.MonitorId = monitor.Key;
+                    brightAction.MonitorName = monitor.Value;
+                    brightAction.Name = $"Jasność: {monitor.Value}";
+                    SelectedAction = brightAction;
+                }
+            }
+            else if (selected is PasteTextAction ptAction)
+            {
+                ptAction.TextToPaste = PasteTextInput.Text;
+                SelectedAction = ptAction;
+            }
+            else if (selected is OpenLinkAction olAction)
+            {
+                olAction.Url = PasteTextInput.Text;
+                SelectedAction = olAction;
+            }
+            else if (selected is CreateFolderAction cfAction)
+            {
+                if (string.IsNullOrEmpty(PasteTextInput.Text))
+                {
+                    using (var fbd = new System.Windows.Forms.FolderBrowserDialog())
+                    {
+                        if (fbd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                        {
+                            cfAction.FolderPath = fbd.SelectedPath;
+                            SelectedAction = cfAction;
+                        }
+                    }
+                }
+                else
+                {
+                    cfAction.FolderPath = PasteTextInput.Text;
+                    SelectedAction = cfAction;
+                }
+            }
+            else if (selected is PowerShellAction psAction)
+            {
+                psAction.ScriptContent = PasteTextInput.Text;
+                SelectedAction = psAction;
+            }
+            else if (selected is MacroAction macro)
+            {
+                if (_macroSteps.Count > 0)
+                {
+                    macro.Steps = new List<MacroStep>(_macroSteps);
+                    SelectedAction = macro;
+                }
+            }
+            else if (selected is MultiAction multi)
+            {
+                // Kaskadowe dodawanie akcji do MultiAction
+                bool adding = true;
+                while (adding)
+                {
+                    ActionPicker subPicker = new ActionPicker(false) { Owner = this };
+                    // Ukrywamy MultiAction w pod-pickerze, żeby uniknąć nieskończonej rekurencji
+                    var currentList = (subPicker.ActionsListBox.ItemsSource as List<IStreamDeckAction>);
+                    if (currentList != null)
+                    {
+                        subPicker.ActionsListBox.ItemsSource = currentList.Where(a => !(a is MultiAction)).ToList();
+                    }
+                    
+                    if (subPicker.ShowDialog() == true && subPicker.SelectedAction != null)
+                    {
+                        multi.Actions.Add(subPicker.SelectedAction);
+                    }
+                    else
+                    {
+                        adding = false;
+                    }
+                }
+                
+                if (multi.Actions.Count > 0)
+                {
+                    SelectedAction = multi;
                 }
             }
             else { SelectedAction = selected; }

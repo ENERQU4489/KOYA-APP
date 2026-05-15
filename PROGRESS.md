@@ -5,20 +5,24 @@ Aplikacja została w pełni przebudowana wizualnie na styl achromatyczny (cybern
 
 ### ✅ Co działa
 - **Architektura**: Polimorficzna serializacja JSON (Actions) przy użyciu .NET 8 (JsonDerivedType).
+- **Obsługa HID (Hardware)**: 
+    - Zrefaktoryzowany `HidBackend.cs` z automatyczną rekonfektacją i stabilnym odczytem RawHID.
+    - **Auto-Picker**: Fizyczne naciśnięcie nieprzypisanego przycisku automatycznie otwiera okno konfiguracji akcji.
+    - Zoptymalizowane wyszukiwanie kontrolek (Button Cache) dla natychmiastowej reakcji na hardware.
 - **Design (Achromatic Cyber)**: 
     - Całkowita rezygnacja z kolorów na rzecz czerni, bieli i szarości.
-    - Naprawione ładowanie ikon (Segoe MDL2 Assets) poprzez optymalizację dziedziczenia czcionek.
-    - Poprawione ładowanie zasobów (logo.png, Audiowide) przy użyciu pack URI.
-- **Intro & UI**: Intro "KOYA" z sekwencyjnym pojawianiem się liter i cyfrowym skanowaniem.
-- **Interakcja (Potencjometry)**: 
-    - Niezależna animacja pierścienia orbitalnego wokół gałek.
-    - Obsługa zdarzeń MouseWheel dla precyzyjnej kontroli analogowej.
+    - Naprawione ładowanie ikon (Segoe MDL2 Assets).
+- **Intro & UI**: Intro "KOYA" z sekwencyjnym pojawianiem się liter.
 - **System**: Stabilny build, działający Tray Icon i system samouczka.
+- **Nowości (v1.4.0)**:
+    - **Spotify Integration**: Dedykowane akcje "Polub" (UI Automation) oraz "Otwórz Spotify".
+    - **Visual & Audio Feedback**: Subtelne kliknięcia dźwiękowe (NAudio) oraz animacje przy każdym naciśnięciu.
+    - **Macro Recorder**: Zaawansowany rejestrator sekwencji klawiszy z zachowaniem opóźnień.
+    - **Virtual Pad Mode**: Kliknięcie w UI teraz wykonuje akcję, a prawy przycisk służy do edycji.
 
 ### ❌ Do zrobienia (Backlog)
-1. **Spotify Integration**: Implementacja akcji dedykowanych dla Spotify.
-2. **Visual Feedback**: Dodanie subtelnych efektów dźwiękowych przy kliknięciach.
-3. **Macro Recorder**: Możliwość nagrywania ciągów klawiszy jako jednej akcji.
+1. **Dynamic Icons**: Wyświetlanie okładki albumu ze Spotify na przycisku.
+2. **Profiles**: Możliwość przełączania całych zestawów akcji (np. Game/Work).
 
 
 ---
