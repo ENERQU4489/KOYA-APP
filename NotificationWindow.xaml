@@ -1,0 +1,67 @@
+<Window x:Class="KOYA_APP.NotificationWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Notification" Height="80" Width="300"
+        Background="Transparent" WindowStyle="None" AllowsTransparency="True" 
+        Topmost="True" ShowInTaskbar="False">
+    
+    <Grid x:Name="MainGrid" Opacity="0" RenderTransformOrigin="1,0">
+        <Grid.RenderTransform>
+            <TranslateTransform x:Name="Translate" X="50"/>
+        </Grid.RenderTransform>
+
+        <Border CornerRadius="12" Margin="10" BorderThickness="1.5">
+            <Border.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                    <GradientStop Color="#CC111111" Offset="0"/>
+                    <GradientStop Color="#CC000000" Offset="1"/>
+                </LinearGradientBrush>
+            </Border.Background>
+            <Border.BorderBrush>
+                <SolidColorBrush Color="#44FFFFFF"/>
+            </Border.BorderBrush>
+            <Border.Effect>
+                <DropShadowEffect BlurRadius="15" Color="Black" Opacity="0.5" ShadowDepth="0"/>
+            </Border.Effect>
+
+            <Grid Margin="15,5">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock x:Name="IconText" Text="&#xE710;" FontFamily="{StaticResource IconFont}" 
+                           FontSize="24" Foreground="White" VerticalAlignment="Center" Margin="0,0,15,0"/>
+                
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                    <TextBlock x:Name="ActionName" Text="ACTION" FontFamily="{StaticResource MainFont}" 
+                               FontSize="14" FontWeight="Bold" Foreground="White"/>
+                    <TextBlock x:Name="ActionDesc" Text="Executed successfully" FontFamily="{StaticResource MainFont}" 
+                               FontSize="10" Foreground="#88FFFFFF"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <Grid.Triggers>
+            <EventTrigger RoutedEvent="Grid.Loaded">
+                <BeginStoryboard>
+                    <Storyboard x:Name="PopupAnim">
+                        <!-- Fade In and Slide In -->
+                        <DoubleAnimation Storyboard.TargetName="MainGrid" Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.3"/>
+                        <DoubleAnimation Storyboard.TargetName="Translate" Storyboard.TargetProperty="X" To="0" Duration="0:0:0.4">
+                            <DoubleAnimation.EasingFunction><PowerEase Power="4" EasingMode="EaseOut"/></DoubleAnimation.EasingFunction>
+                        </DoubleAnimation>
+
+                        <!-- Stay for 2 seconds -->
+                        
+                        <!-- Fade Out and Slide Out -->
+                        <DoubleAnimation Storyboard.TargetName="MainGrid" Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.3" BeginTime="0:0:2.5"/>
+                        <DoubleAnimation Storyboard.TargetName="Translate" Storyboard.TargetProperty="X" To="50" Duration="0:0:0.4" BeginTime="0:0:2.5">
+                            <DoubleAnimation.EasingFunction><PowerEase Power="4" EasingMode="EaseIn"/></DoubleAnimation.EasingFunction>
+                        </DoubleAnimation>
+                    </Storyboard>
+                </BeginStoryboard>
+            </EventTrigger>
+        </Grid.Triggers>
+    </Grid>
+</Window>

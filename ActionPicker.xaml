@@ -75,9 +75,19 @@
                         <TextBox x:Name="ShortcutTextBox" Visibility="Collapsed" Height="45" Background="Transparent" Foreground="White" 
                                  TextAlignment="Center" VerticalContentAlignment="Center" IsReadOnly="True" BorderThickness="0"
                                  PreviewKeyDown="ShortcutTextBox_PreviewKeyDown" FontFamily="{StaticResource MainFont}" FontSize="14"/>
-                        <TextBox x:Name="PasteTextInput" Visibility="Collapsed" Height="45" Background="Transparent" Foreground="White" 
-                                 TextAlignment="Center" VerticalContentAlignment="Center" BorderThickness="0"
-                                 FontFamily="{StaticResource MainFont}" FontSize="14" Tag="WPISZ TEKST DO WKLEJENIA..."/>
+                        <Grid x:Name="PasteTextPanel" Visibility="Collapsed">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBox x:Name="PasteTextInput" Height="45" Background="Transparent" Foreground="White" 
+                                     TextAlignment="Center" VerticalContentAlignment="Center" BorderThickness="0"
+                                     FontFamily="{StaticResource MainFont}" FontSize="14" Tag="WPISZ TEKST DO WKLEJENIA..."/>
+                            <Button x:Name="BrowseFileButton" Grid.Column="1" Click="BrowseFile_Click" Width="45" Height="45" 
+                                    Style="{StaticResource GlassButtonStyle}" BorderThickness="1,0,0,0">
+                                <TextBlock Text="📁" FontSize="18" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                            </Button>
+                        </Grid>
                         
                         <Grid x:Name="MacroPanel" Visibility="Collapsed" Height="150">
                             <Grid.RowDefinitions>

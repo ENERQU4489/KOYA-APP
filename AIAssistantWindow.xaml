@@ -84,6 +84,7 @@
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
 
                         <TextBlock Text="AI" Foreground="White" FontWeight="Bold" FontSize="18" VerticalAlignment="Center" Margin="5,0,15,0">
@@ -106,10 +107,19 @@
                             </TextBlock.Style>
                         </TextBlock>
 
-                        <StackPanel Grid.Column="2" Orientation="Horizontal">
+                        <ComboBox x:Name="ProviderSelector" Grid.Column="2" Width="90" Height="30" Margin="5,0" 
+                                  Background="#15FFFFFF" Foreground="White" BorderThickness="1" BorderBrush="#33FFFFFF"
+                                  VerticalContentAlignment="Center" SelectionChanged="ProviderSelector_SelectionChanged">
+                            <ComboBoxItem Content="Google" IsSelected="True"/>
+                            <ComboBoxItem Content="Groq"/>
+                            <ComboBoxItem Content="OpenAI"/>
+                        </ComboBox>
+
+                        <StackPanel Grid.Column="3" Orientation="Horizontal">
                             <Button Content="&#xE722;" FontFamily="{StaticResource IconFont}" Style="{StaticResource IconButton}" Width="40" Height="40" Click="Capture_Click"/>
                             <StackPanel x:Name="ExpandedToolbar" Orientation="Horizontal" Visibility="Collapsed">
                                 <Button Content="&#xE16C;" FontFamily="{StaticResource IconFont}" Style="{StaticResource IconButton}" Width="40" Height="40" Click="AttachFile_Click" Margin="5,0"/>
+                                <Button Content="&#xE115;" FontFamily="{StaticResource IconFont}" Style="{StaticResource IconButton}" Width="40" Height="40" Click="Settings_Click" Margin="5,0"/>
                             </StackPanel>
                             <Button Content="&#xE106;" FontFamily="{StaticResource IconFont}" Style="{StaticResource IconButton}" Width="40" Height="40" Click="Close_Click"/>
                         </StackPanel>
@@ -119,22 +129,34 @@
                     <Grid x:Name="ExpandedView" Grid.Row="1" Visibility="Collapsed" Margin="20,5,20,20">
                         <!-- Setup Overlay -->
                         <Border x:Name="SetupView" Visibility="Collapsed" Background="#F00D0D0D" CornerRadius="12" BorderThickness="1" BorderBrush="#33FFFFFF" Panel.ZIndex="10" Padding="25">
-                            <StackPanel VerticalAlignment="Center">
-                                <TextBlock Text="KONFIGURACJA GEMINI AI" Foreground="White" FontWeight="Bold" FontSize="16" Margin="0,0,0,10" HorizontalAlignment="Center"/>
-                                <TextBlock Text="Aby odblokować AI, wklej klucz API z aistudio.google.com" Foreground="#88FFFFFF" FontSize="12" Margin="0,0,0,20" TextWrapping="Wrap" TextAlignment="Center"/>
-                                
-                                <Border Background="#1AFFFFFF" CornerRadius="8" BorderThickness="1" BorderBrush="#22FFFFFF" Padding="12,8" Margin="0,0,0,20">
-                                    <TextBox x:Name="ApiKeyInput" Background="Transparent" Foreground="White" BorderThickness="0" FontSize="14" CaretBrush="White" VerticalContentAlignment="Center"/>
-                                </Border>
+                            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Text="KONFIGURACJA AI" Foreground="White" FontWeight="Bold" FontSize="16" Margin="0,0,0,10" HorizontalAlignment="Center"/>
+                                    
+                                    <TextBlock Text="Klucz Google Gemini (aistudio.google.com):" Foreground="#88FFFFFF" FontSize="11" Margin="0,5"/>
+                                    <Border Background="#1AFFFFFF" CornerRadius="8" BorderThickness="1" BorderBrush="#22FFFFFF" Padding="12,8" Margin="0,0,0,10">
+                                        <TextBox x:Name="ApiKeyInput" Background="Transparent" Foreground="White" BorderThickness="0" FontSize="14" CaretBrush="White"/>
+                                    </Border>
 
-                                <Button Style="{StaticResource IconButton}" Background="#33FFFFFF" Height="45" Click="SaveKey_Click">
-                                    <TextBlock Text="ZAPISZ KLUCZ GEMINI" Foreground="White" FontWeight="Bold" FontSize="13"/>
-                                </Button>
-                                
-                                <Button Style="{StaticResource IconButton}" Height="30" Margin="0,10,0,0" Click="ResetKey_Click">
-                                    <TextBlock Text="USUŃ OBECNY KLUCZ" Foreground="#66FFFFFF" FontSize="11"/>
-                                </Button>
-                            </StackPanel>
+                                    <TextBlock Text="Klucz Groq (console.groq.com):" Foreground="#88FFFFFF" FontSize="11" Margin="0,5"/>
+                                    <Border Background="#1AFFFFFF" CornerRadius="8" BorderThickness="1" BorderBrush="#22FFFFFF" Padding="12,8" Margin="0,0,0,10">
+                                        <TextBox x:Name="GroqKeyInput" Background="Transparent" Foreground="White" BorderThickness="0" FontSize="14" CaretBrush="White"/>
+                                    </Border>
+
+                                    <TextBlock Text="Klucz OpenAI (platform.openai.com):" Foreground="#88FFFFFF" FontSize="11" Margin="0,5"/>
+                                    <Border Background="#1AFFFFFF" CornerRadius="8" BorderThickness="1" BorderBrush="#22FFFFFF" Padding="12,8" Margin="0,0,0,20">
+                                        <TextBox x:Name="OpenAIKeyInput" Background="Transparent" Foreground="White" BorderThickness="0" FontSize="14" CaretBrush="White"/>
+                                    </Border>
+
+                                    <Button Style="{StaticResource IconButton}" Background="#33FFFFFF" Height="45" Click="SaveKey_Click">
+                                        <TextBlock Text="ZAPISZ USTAWIENIA AI" Foreground="White" FontWeight="Bold" FontSize="13"/>
+                                    </Button>
+                                    
+                                    <Button Style="{StaticResource IconButton}" Height="30" Margin="0,10,0,0" Click="ResetKey_Click">
+                                        <TextBlock Text="WYCZYŚĆ WSZYSTKIE KLUCZE" Foreground="#66FFFFFF" FontSize="11"/>
+                                    </Button>
+                                </StackPanel>
+                            </ScrollViewer>
                         </Border>
 
                         <!-- Normal View (Response & Files) -->

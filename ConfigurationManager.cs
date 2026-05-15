@@ -6,7 +6,10 @@ namespace KOYA_APP
     public class AppConfig
     {
         public bool IsFirstStart { get; set; } = true;
+        public bool EnablePopups { get; set; } = true;
         public string? GeminiKey { get; set; }
+        public string? GroqKey { get; set; }
+        public string? OpenAIKey { get; set; }
         public IStreamDeckAction?[] Actions { get; set; } = new IStreamDeckAction?[14];
     }
 
@@ -15,15 +18,19 @@ namespace KOYA_APP
         private static readonly string ConfigPath = Path.Combine(
             System.AppDomain.CurrentDomain.BaseDirectory, "config.json");
 
-        public static void SaveConfig(IStreamDeckAction?[] actions, bool isFirstStart = false, string? geminiKey = null)
+        public static void SaveConfig(IStreamDeckAction?[] actions, bool isFirstStart = false, string? geminiKey = null, bool? enablePopups = null, string? groqKey = null, string? openAIKey = null)
         {
             try
             {
+                var current = LoadConfig();
                 var config = new AppConfig 
                 { 
                     Actions = actions, 
                     IsFirstStart = isFirstStart,
-                    GeminiKey = geminiKey ?? LoadConfig().GeminiKey
+                    GeminiKey = geminiKey ?? current.GeminiKey,
+                    GroqKey = groqKey ?? current.GroqKey,
+                    OpenAIKey = openAIKey ?? current.OpenAIKey,
+                    EnablePopups = enablePopups ?? current.EnablePopups
                 };
                 var options = new JsonSerializerOptions { WriteIndented = true };
                 string json = JsonSerializer.Serialize(config, options);

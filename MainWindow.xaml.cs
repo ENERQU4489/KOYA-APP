@@ -20,6 +20,8 @@ namespace KOYA_APP
         private HidBackend _hidBackend = new HidBackend();
         private Dictionary<int, DateTime> _lastAnalogProcessTime = new Dictionary<int, DateTime>();
 
+        private bool _enablePopups = true;
+
         public MainWindow()
         {
             AppDomain.CurrentDomain.UnhandledException += (s, e) => {
@@ -39,6 +41,47 @@ namespace KOYA_APP
                 System.IO.File.WriteAllText("crash_init_log.txt", ex.ToString());
                 throw;
             }
+        }
+
+        private void LoadAndApplyConfig()
+        {
+            var config = ConfigurationManager.LoadConfig();
+            _buttonActions = config.Actions;
+            _enablePopups = config.EnablePopups;
+            UpdatePopupToggleButtonUI();
+
+            for (int i = 0; i < _buttonActions.Length; i++)
+            {
+                if (_buttonActions[i] != null)
+                {
+                    UpdateButtonUI(i, _buttonActions[i]!);
+                }
+            }
+        }
+
+        private void UpdatePopupToggleButtonUI()
+        {
+            PopupToggleButton.Opacity = _enablePopups ? 1.0 : 0.4;
+            PopupToggleButton.ToolTip = _enablePopups ? "Popup Notifications: ON" : "Popup Notifications: OFF";
+        }
+
+        private void PopupToggle_Click(object sender, RoutedEventArgs e)
+        {
+            _enablePopups = !_enablePopups;
+            UpdatePopupToggleButtonUI();
+            ConfigurationManager.SaveConfig(_buttonActions, enablePopups: _enablePopups);
+            
+            ShowNotification("\uEA8F", "Notifications", _enablePopups ? "Enabled" : "Disabled");
+        }
+
+        private void ShowNotification(string icon, string name, string description)
+        {
+            if (!_enablePopups) return;
+            
+            Dispatcher.Invoke(() => {
+                var notify = new NotificationWindow(icon, name, description);
+                notify.Show();
+            });
         }
 
         private bool ShouldProcessAnalog(int index)
@@ -131,9 +174,13 @@ namespace KOYA_APP
                             return;
                         }
 
-                        // 2. Wykonaj akcję
-                        action?.Execute();
-                        PlayClickSound();
+                        if (action != null)
+                        {
+                            // 2. Wykonaj akcję
+                            action.Execute();
+                            PlayClickSound();
+                            ShowNotification(action.Icon, action.Name, "Akcja wykonana");
+                        }
                         
                         // 3. Wizualny feedback (Podświetlenie)
                         if (_buttonCache.TryGetValue(index.ToString(), out var btn))
@@ -172,7 +219,11 @@ namespace KOYA_APP
                             return;
                         }
 
-                        action?.ExecuteAnalog(direction);
+                        if (action != null)
+                        {
+                            action.ExecuteAnalog(direction);
+                            ShowNotification(action.Icon, action.Name, direction ? "Zwiększono / Następny" : "Zmniejszono / Poprzedni");
+                        }
                         
                         // Feedback wizualny tylko jeśli okno jest widoczne i nie za często
                         if (this.IsVisible && _buttonCache.TryGetValue(index.ToString(), out var btn))
@@ -269,22 +320,7 @@ namespace KOYA_APP
             _tutorialManager?.Start();
         }
 
-        private void LoadAndApplyConfig()
-        {
-            var config = ConfigurationManager.LoadConfig();
-            _buttonActions = config.Actions;
-            
-            for (int i = 0; i < _buttonActions.Length; i++)
-            {
-                if (_buttonActions[i] != null)
-                {
-                    UpdateButtonUI(i, _buttonActions[i]!);
-                }
-            }
-        }
-
-        private void UpdateButtonUI(int index, IStreamDeckAction action)
-        {
+        private void UpdateButtonUI(int index, IStreamDeckAction action)        {
             var btn = FindButtonByTag(index.ToString());
             if (btn == null) return;
 
@@ -412,6 +448,7 @@ namespace KOYA_APP
                 // Prawy klik w UI teraz wykonuje akcję (do testów)
                 action.Execute();
                 PlayClickSound();
+                ShowNotification(action.Icon, action.Name, "Akcja wykonana (UI)");
             }
             else
             {
@@ -428,7 +465,9 @@ namespace KOYA_APP
 
             if (_buttonActions[index] != null)
             {
-                _buttonActions[index].ExecuteAnalog(e.Delta > 0);
+                bool direction = e.Delta > 0;
+                _buttonActions[index].ExecuteAnalog(direction);
+                ShowNotification(_buttonActions[index].Icon, _buttonActions[index].Name, direction ? "Zwiększono / Następny" : "Zmniejszono / Poprzedni");
             }
         }
 

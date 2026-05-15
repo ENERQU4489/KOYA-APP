@@ -1,93 +1,44 @@
-# KOYA-APP
+# KOYA - Achromatic Control Hub ⌨️🌑
 
-Wirtualny makropad / Stream Deck na Windows. Aplikacja WPF (.NET 8) z 15 konfigurowalnymi przyciskami, z których każdy może wykonywać wybraną akcję systemową — bez fizycznego urządzenia.
+**KOYA** to zaawansowana aplikacja sterująca typu Stream Deck, zaprojektowana z myślą o minimalistycznej estetyce (Achromatic Cyberpunk) i maksymalnej funkcjonalności. Integruje fizyczny hardware (Arduino/Custom HID) z wirtualnym panelem sterowania i asystentem AI.
 
-🚀 **Główne Funkcje**
-Aplikacja wspiera szeroki wachlarz akcji, które można przypisać do przycisków lub skrótów:
-- **Zarządzanie Multimediami**: Play/Pause, następny/poprzedni utwór, regulacja głośności.
-- **Integracja Spotify**: Dedykowane akcje "Polub" oraz "Otwórz Spotify".
-- **Macro Recorder**: Nagrywanie sekwencji klawiszy z zachowaniem opóźnień.
-- **Visual & Audio Feedback**: Kliknięcia dźwiękowe oraz animacje przycisków.
-- **Narzędzia Systemowe**: Screenshoty, Task Manager, Alt-Tab, wyciszanie mikrofonu.
+## 🚀 Kluczowe Funkcje
 
----
+- **Multi-Action Hub**: 15 konfigurowalnych przycisków w UI + wsparcie dla gałek analogowych (Enkodery).
+- **Potężny Asystent AI**: Zintegrowana obsługa trzech gigantów:
+  - **Google Gemini**: Inteligentny fallback między v1 i v1beta dla maksymalnej dostępności.
+  - **Groq**: Błyskawiczne modele Llama 3.3 (idealne jako darmowa alternatywa).
+  - **OpenAI**: Pełna moc GPT-4o z analizą obrazu (zrzuty ekranu).
+- **Automatyzacja & Akcje**:
+  - Sterowanie Spotify (Like/Open).
+  - Soundboard (MP3/WAV) z wbudowaną przeglądarką plików 📁.
+  - Zaawansowany Rejestrator Makr (klawiatura + mysz).
+  - Skróty klawiszowe, PowerShell, Mikser Głośności, Jasność Monitora.
+- **Produkcyjna Jakość**:
+  - **Single-File EXE**: Przenośna aplikacja, która odpali się na każdym PC bez instalacji .NET.
+  - **Animated Feedback**: Płynne animacje przycisków i system powiadomień popup w rogu ekranu.
+  - **Tray Support**: Działa w tle, z szybkim dostępem z paska zadań.
 
-## Wymagania
+## 🛠️ Instalacja & Build
 
-| Wymaganie | Wersja |
-|-----------|--------|
-| .NET SDK | 8.0+ (net8.0-windows) |
-| System operacyjny | Windows 10 / 11 (x64) |
-| NAudio | 2.3.0+ (NuGet) |
-| System.Windows.Extensions | 6.0.0+ (NuGet) |
+Aplikacja jest dystrybuowana jako **self-contained executable**.
 
----
+1. Pobierz `KOYA-APP.exe` z folderu wydań.
+2. Uruchom – wszystkie zależności są zawarte w pliku.
+3. (Opcjonalnie) Skonfiguruj klucze AI w panelu asystenta, aby odblokować wsparcie techniczne na żywo.
 
-## Instalacja
-
+### Budowanie ze źródeł:
+Wymagany .NET 8 SDK.
 ```bash
-git clone https://github.com/ENERQU4489/KOYA-APP.git
-cd KOYA-APP
-dotnet restore
-dotnet build
-dotnet run
+dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o "./Publish"
 ```
 
-Lub otwórz `KOYA-APP.csproj` w Visual Studio 2022+ i uruchom przez F5.
+## 🔌 Hardware (Opcjonalnie)
+KOYA łączy się z urządzeniami RawHID. Domyślnie współpracuje ze skryptem `arduino_koya.ino` zawartym w repozytorium.
+- **Auto-Picker**: Naciśnięcie fizycznego przycisku bez przypisanej akcji automatycznie otwiera menu konfiguracji.
+
+## 🛡️ Bezpieczeństwo
+Wszystkie konfiguracje (w tym klucze API) są przechowywane lokalnie w pliku `config.json` w folderze aplikacji. Repozytorium zawiera `.gitignore` chroniący Twoje prywatne dane.
 
 ---
-
-## Użycie
-
-1. Uruchom aplikację — pojawi się panel z 15 przyciskami oraz przyciskami Volume Up / Volume Down.
-2. Kliknij dowolny **pusty przycisk** — otworzy się `ActionPicker` z listą dostępnych akcji.
-3. Wybierz akcję, skonfiguruj opcjonalne parametry (ścieżka do `.exe`, skrót klawiszowy, urządzenie audio), kliknij **Zastosuj**.
-4. Przycisk zostanie oznaczony nazwą wybranej akcji. Każde kolejne kliknięcie **wykonuje** przypisaną akcję.
-5. **Prawy przycisk myszy** na przypisanym przycisku pozwala na ponowną edycję akcji.
-6. Pasek tytułu jest przeciągalny; przyciski **−** i **✕** minimalizują / zamykają okno.
-
----
-
-## Architektura
-
-```
-KOYA-APP/
-├── App.xaml / App.xaml.cs          # Punkt wejścia aplikacji WPF
-├── MainWindow.xaml / .cs           # Główny panel 15 przycisków + Volume
-├── ActionPicker.xaml / .cs         # Dialog wyboru i konfiguracji akcji
-├── IStreamDeckAction.cs            # Interfejs bazowy wszystkich akcji
-├── MacroAction.cs                  # Obsługa makr (sekwencji klawiszy)
-├── SpotifyLikeAction.cs            # Integracja ze Spotify (UI Automation)
-└── KOYA-APP.csproj                 # Definicja projektu .NET 8 WPF
-```
-
-### Interfejs `IStreamDeckAction`
-
-Każda akcja implementuje `IStreamDeckAction`:
-
-```csharp
-public interface IStreamDeckAction
-{
-    string Name { get; }
-    string Description { get; }
-    string Icon { get; }
-    void Execute();
-    void ExecuteAnalog(bool direction);
-}
-```
-
----
-
-## Zależności NuGet
-
-```xml
-<PackageReference Include="NAudio" Version="2.3.0" />
-<PackageReference Include="HidSharp" Version="2.6.4" />
-<PackageReference Include="System.Windows.Extensions" Version="6.0.0" />
-```
-
----
-
-## Licencja
-
-Projekt rozwijany przez ENERQU4489. Wszelkie prawa zastrzeżone.
+*Created with 🖤 for the Cyberpunk Era.*

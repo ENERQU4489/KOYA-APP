@@ -17,6 +17,9 @@ namespace KOYA_APP
         private ObservableCollection<string> _attachedFiles = new ObservableCollection<string>();
         private Storyboard? _thinkingAnim;
         private string? _apiKey;
+        private string? _groqKey;
+        private string? _openAIKey;
+        private AIProvider _currentProvider = AIProvider.Google;
         private byte[]? _lastScreenshot;
         private List<string> _fullFilePaths = new List<string>();
 
@@ -27,11 +30,21 @@ namespace KOYA_APP
             AttachedFilesList.ItemsSource = _attachedFiles;
             _thinkingAnim = (Storyboard)this.Resources["ThinkingAnimation"];
 
-            // Sprawdź klucz API (Google Gemini)
+            LoadConfigKeys();
+        }
+
+        private void LoadConfigKeys()
+        {
             var config = ConfigurationManager.LoadConfig();
             _apiKey = config.GeminiKey;
+            _groqKey = config.GroqKey;
+            _openAIKey = config.OpenAIKey;
 
-            if (string.IsNullOrEmpty(_apiKey))
+            ApiKeyInput.Text = _apiKey;
+            GroqKeyInput.Text = _groqKey;
+            OpenAIKeyInput.Text = _openAIKey;
+
+            if (string.IsNullOrEmpty(_apiKey) && string.IsNullOrEmpty(_groqKey) && string.IsNullOrEmpty(_openAIKey))
             {
                 this.Loaded += (s, e) => {
                     ExpandWindow();
@@ -42,25 +55,42 @@ namespace KOYA_APP
 
         private void SaveKey_Click(object sender, RoutedEventArgs e)
         {
-            string key = ApiKeyInput.Text.Trim();
-            if (string.IsNullOrWhiteSpace(key)) return;
+            _apiKey = ApiKeyInput.Text.Trim();
+            _groqKey = GroqKeyInput.Text.Trim();
+            _openAIKey = OpenAIKeyInput.Text.Trim();
 
-            _apiKey = key;
             var config = ConfigurationManager.LoadConfig();
-            ConfigurationManager.SaveConfig(config.Actions, config.IsFirstStart, key);
+            ConfigurationManager.SaveConfig(config.Actions, config.IsFirstStart, _apiKey, config.EnablePopups, _groqKey, _openAIKey);
 
             SetupView.Visibility = Visibility.Collapsed;
-            ResponseText.Text = "Klucz Google Gemini zapisany! Możesz teraz korzystać z asystenta.";
+            ResponseText.Text = "Ustawienia AI zapisane! Możesz teraz korzystać z asystenta.";
         }
 
         private void ResetKey_Click(object sender, RoutedEventArgs e)
         {
             var config = ConfigurationManager.LoadConfig();
-            ConfigurationManager.SaveConfig(config.Actions, config.IsFirstStart, "");
-            _apiKey = null;
+            ConfigurationManager.SaveConfig(config.Actions, config.IsFirstStart, "", config.EnablePopups, "", "");
+            
+            _apiKey = _groqKey = _openAIKey = null;
             ApiKeyInput.Clear();
+            GroqKeyInput.Clear();
+            OpenAIKeyInput.Clear();
+            
             SetupView.Visibility = Visibility.Visible;
-            ResponseText.Text = "Klucz Gemini został usunięty. Wprowadź nowy z Google AI Studio.";
+            ResponseText.Text = "Klucze AI zostały usunięte.";
+        }
+
+        private void ProviderSelector_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (ProviderSelector == null) return;
+            if (ProviderSelector.SelectedIndex == 0) _currentProvider = AIProvider.Google;
+            else if (ProviderSelector.SelectedIndex == 1) _currentProvider = AIProvider.Groq;
+            else if (ProviderSelector.SelectedIndex == 2) _currentProvider = AIProvider.OpenAI;
+        }
+
+        private void Settings_Click(object sender, RoutedEventArgs e)
+        {
+            SetupView.Visibility = SetupView.Visibility == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible;
         }
 
         private void Close_Click(object sender, RoutedEventArgs e) => Close();
@@ -116,17 +146,15 @@ namespace KOYA_APP
             string prompt = PromptInput.Text;
             if (string.IsNullOrWhiteSpace(prompt) && _attachedFiles.Count == 0 && _lastScreenshot == null) return;
 
-            if (string.IsNullOrEmpty(_apiKey)) return;
-
             if (!_isExpanded) ExpandWindow();
 
-            ResponseText.Text = "KOYA AI (Gemini) analizuje zapytanie...";
+            ResponseText.Text = $"KOYA AI ({_currentProvider}) analizuje zapytanie...";
             StartThinking();
 
             try
             {
-                var service = new GeminiService(_apiKey);
-                string response = await service.GetAIResponse(prompt, _fullFilePaths, _lastScreenshot);
+                var service = new AIService(_apiKey, _groqKey, _openAIKey);
+                string response = await service.GetAIResponse(prompt, _fullFilePaths, _lastScreenshot, _currentProvider);
                 
                 Dispatcher.Invoke(() => {
                     StopThinking();
@@ -141,7 +169,7 @@ namespace KOYA_APP
             {
                 Dispatcher.Invoke(() => {
                     StopThinking();
-                    ResponseText.Text = "Wystąpił błąd Gemini: " + ex.Message;
+                    ResponseText.Text = "Wystąpił błąd: " + ex.Message;
                 });
             }
         }

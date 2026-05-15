@@ -88,6 +88,7 @@
                         </StackPanel>
 
                         <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="20,0">
+                            <Button x:Name="PopupToggleButton" Content="&#xEA8F;" Style="{StaticResource GlassButtonStyle}" Click="PopupToggle_Click" BorderThickness="0" Width="40" Height="40" FontSize="14" ToolTip="Toggle Popup Notifications"/>
                             <Button Content="&#xE897;" Style="{StaticResource GlassButtonStyle}" Click="Tutorial_Click" BorderThickness="0" Width="40" Height="40" FontSize="14" ToolTip="Tutorial"/>
                             <Button Content="&#xE949;" Style="{StaticResource GlassButtonStyle}" Click="Minimize_Click" BorderThickness="0" Width="40" Height="40" FontSize="12"/>
                             <Button Content="&#xE106;" Style="{StaticResource GlassButtonStyle}" Click="Close_Click" BorderThickness="0" Width="40" Height="40" FontSize="12"/>

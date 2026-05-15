@@ -92,7 +92,8 @@ namespace KOYA_APP
             ExtraSettingsPanel.Visibility = Visibility.Collapsed;
             DevicesComboBox.Visibility = Visibility.Collapsed;
             ShortcutTextBox.Visibility = Visibility.Collapsed;
-            PasteTextInput.Visibility = Visibility.Collapsed;
+            PasteTextPanel.Visibility = Visibility.Collapsed;
+            BrowseFileButton.Visibility = Visibility.Collapsed;
             MacroPanel.Visibility = Visibility.Collapsed;
 
             if (selected is SelectMicAction || selected is MuteMicrophoneAction)
@@ -215,24 +216,34 @@ namespace KOYA_APP
                 ExtraSettingsTitle.Text = "Wpisz tekst do wklejenia:";
                 PasteTextInput.Text = pt.TextToPaste;
             }
+            else if (selected is OpenAppAction appAction)
+            {
+                ExtraSettingsPanel.Visibility = Visibility.Visible;
+                PasteTextPanel.Visibility = Visibility.Visible;
+                BrowseFileButton.Visibility = Visibility.Visible;
+                ExtraSettingsTitle.Text = "Wybierz aplikację (.exe) lub wpisz ścieżkę:";
+                PasteTextInput.Text = appAction.Path;
+            }
             else if (selected is OpenLinkAction ol)
             {
                 ExtraSettingsPanel.Visibility = Visibility.Visible;
-                PasteTextInput.Visibility = Visibility.Visible;
+                PasteTextPanel.Visibility = Visibility.Visible;
                 ExtraSettingsTitle.Text = "Wpisz adres URL (np. https://google.com):";
                 PasteTextInput.Text = ol.Url;
             }
             else if (selected is CreateFolderAction cf)
             {
                 ExtraSettingsPanel.Visibility = Visibility.Visible;
-                PasteTextInput.Visibility = Visibility.Visible;
-                ExtraSettingsTitle.Text = "Wpisz ścieżkę folderu lub wybierz po kliknięciu Zastosuj:";
+                PasteTextPanel.Visibility = Visibility.Visible;
+                BrowseFileButton.Visibility = Visibility.Visible;
+                ExtraSettingsTitle.Text = "Wpisz ścieżkę folderu lub wybierz ikonę folderu:";
                 PasteTextInput.Text = cf.FolderPath;
             }
             else if (selected is PowerShellAction ps)
             {
                 ExtraSettingsPanel.Visibility = Visibility.Visible;
-                PasteTextInput.Visibility = Visibility.Visible;
+                PasteTextPanel.Visibility = Visibility.Visible;
+                BrowseFileButton.Visibility = Visibility.Visible;
                 ExtraSettingsTitle.Text = "Wpisz komende lub sciezke do skryptu (.ps1):";
                 PasteTextInput.Text = ps.ScriptContent;
             }
@@ -247,9 +258,33 @@ namespace KOYA_APP
             else if (selected is SoundboardAction sb)
             {
                 ExtraSettingsPanel.Visibility = Visibility.Visible;
-                PasteTextInput.Visibility = Visibility.Visible;
+                PasteTextPanel.Visibility = Visibility.Visible;
+                BrowseFileButton.Visibility = Visibility.Visible;
                 ExtraSettingsTitle.Text = "Wybierz plik dźwiękowy (MP3/WAV) lub wpisz ścieżkę:";
                 PasteTextInput.Text = sb.FilePath;
+            }
+        }
+
+        private void BrowseFile_Click(object sender, RoutedEventArgs e)
+        {
+            var selected = ActionsListBox.SelectedItem as IStreamDeckAction;
+            if (selected is SoundboardAction)
+            {
+                var ofd = new Microsoft.Win32.OpenFileDialog { Filter = "Audio Files (*.mp3, *.wav)|*.mp3;*.wav" };
+                if (ofd.ShowDialog() == true) PasteTextInput.Text = ofd.FileName;
+            }
+            else if (selected is OpenAppAction || selected is PowerShellAction)
+            {
+                var ofd = new Microsoft.Win32.OpenFileDialog { Filter = "Executable Files (*.exe, *.ps1, *.bat)|*.exe;*.ps1;*.bat|All Files (*.*)|*.*" };
+                if (ofd.ShowDialog() == true) PasteTextInput.Text = ofd.FileName;
+            }
+            else if (selected is CreateFolderAction)
+            {
+                using (var fbd = new System.Windows.Forms.FolderBrowserDialog())
+                {
+                    if (fbd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                        PasteTextInput.Text = fbd.SelectedPath;
+                }
             }
         }
 
@@ -429,8 +464,8 @@ namespace KOYA_APP
 
             if (selected is OpenAppAction appAction)
             {
-                Microsoft.Win32.OpenFileDialog ofd = new Microsoft.Win32.OpenFileDialog { Filter = "Aplikacje (*.exe)|*.exe" };
-                if (ofd.ShowDialog() == true) { appAction.Path = ofd.FileName; SelectedAction = appAction; }
+                appAction.Path = PasteTextInput.Text;
+                SelectedAction = appAction;
             }
             else if (selected is CustomShortcutAction shortcutAction)
             {
@@ -479,22 +514,8 @@ namespace KOYA_APP
             }
             else if (selected is CreateFolderAction cfAction)
             {
-                if (string.IsNullOrEmpty(PasteTextInput.Text))
-                {
-                    using (var fbd = new System.Windows.Forms.FolderBrowserDialog())
-                    {
-                        if (fbd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-                        {
-                            cfAction.FolderPath = fbd.SelectedPath;
-                            SelectedAction = cfAction;
-                        }
-                    }
-                }
-                else
-                {
-                    cfAction.FolderPath = PasteTextInput.Text;
-                    SelectedAction = cfAction;
-                }
+                cfAction.FolderPath = PasteTextInput.Text;
+                SelectedAction = cfAction;
             }
             else if (selected is PowerShellAction psAction)
             {
@@ -538,16 +559,8 @@ namespace KOYA_APP
             }
             else if (selected is SoundboardAction sbAction)
             {
-                if (string.IsNullOrEmpty(PasteTextInput.Text))
-                {
-                    Microsoft.Win32.OpenFileDialog ofd = new Microsoft.Win32.OpenFileDialog { Filter = "Audio Files (*.mp3, *.wav)|*.mp3;*.wav" };
-                    if (ofd.ShowDialog() == true) { sbAction.FilePath = ofd.FileName; SelectedAction = sbAction; }
-                }
-                else
-                {
-                    sbAction.FilePath = PasteTextInput.Text;
-                    SelectedAction = sbAction;
-                }
+                sbAction.FilePath = PasteTextInput.Text;
+                SelectedAction = sbAction;
             }
             else { SelectedAction = selected; }
 
