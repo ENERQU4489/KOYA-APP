@@ -1,6 +1,6 @@
-# KOYA - Achromatic Control Hub ⌨️🌑
+# KOYA -  ⌨️🌑
 
-**KOYA** to zaawansowana aplikacja sterująca typu Stream Deck, zaprojektowana z myślą o minimalistycznej estetyce (Achromatic Cyberpunk) i maksymalnej funkcjonalności. Integruje fizyczny hardware (Arduino/Custom HID) z wirtualnym panelem sterowania i asystentem AI.
+**KOYA** to zaawansowana aplikacja sterująca typu Stream Deck, zaprojektowana z myślą o minimalistycznej estetyce i maksymalnej funkcjonalności. Integruje fizyczny hardware (Arduino/Custom HID) z wirtualnym panelem sterowania i asystentem AI.
 
 ## 🚀 Kluczowe Funkcje
 
@@ -41,4 +41,4 @@ KOYA łączy się z urządzeniami RawHID. Domyślnie współpracuje ze skryptem 
 Wszystkie konfiguracje (w tym klucze API) są przechowywane lokalnie w pliku `config.json` w folderze aplikacji. Repozytorium zawiera `.gitignore` chroniący Twoje prywatne dane.
 
 ---
-*Created with 🖤 for the Cyberpunk Era.*
+*Created with 🖤.*
