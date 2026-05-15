@@ -102,7 +102,7 @@ namespace KOYA_APP
             if (index < 0 || index >= _buttonActions.Length) return;
             
             bool isAnalog = index >= 12;
-            ActionPicker picker = new ActionPicker(isAnalog) { Owner = this };
+            ActionPicker picker = new ActionPicker(index, _hidBackend, isAnalog) { Owner = this };
             
             if (picker.ShowDialog() == true)
             {
@@ -394,16 +394,8 @@ namespace KOYA_APP
             if (!int.TryParse(btn.Tag.ToString(), out int index)) return;
             if (index < 0 || index >= _buttonActions.Length) return;
 
-            var action = _buttonActions[index];
-            if (action == null)
-            {
-                OpenPickerForIndex(index);
-            }
-            else
-            {
-                action.Execute();
-                PlayClickSound();
-            }
+            // Lewy klik w UI teraz zawsze otwiera okno konfiguracji, nie wykonuje akcji.
+            OpenPickerForIndex(index);
         }
 
         private void OnDeckButtonRightClick(object sender, MouseButtonEventArgs e)
@@ -414,7 +406,18 @@ namespace KOYA_APP
             if (!int.TryParse(btn.Tag.ToString(), out int index)) return;
             if (index < 0 || index >= _buttonActions.Length) return;
 
-            OpenPickerForIndex(index);
+            var action = _buttonActions[index];
+            if (action != null)
+            {
+                // Prawy klik w UI teraz wykonuje akcję (do testów)
+                action.Execute();
+                PlayClickSound();
+            }
+            else
+            {
+                // Jeśli puste, otwórz picker
+                OpenPickerForIndex(index);
+            }
         }
 
         private void OnKnobMouseWheel(object sender, MouseWheelEventArgs e)
@@ -449,6 +452,11 @@ namespace KOYA_APP
             _isShuttingDown = true;
             _notifyIcon.Dispose();
             System.Windows.Application.Current.Shutdown();
+        }
+
+        private void DisconnectedOverlay_Click(object sender, MouseButtonEventArgs e)
+        {
+            DisconnectedOverlay.Visibility = Visibility.Collapsed;
         }
     }
 }

@@ -79,14 +79,33 @@
                                  TextAlignment="Center" VerticalContentAlignment="Center" BorderThickness="0"
                                  FontFamily="{StaticResource MainFont}" FontSize="14" Tag="WPISZ TEKST DO WKLEJENIA..."/>
                         
-                        <Grid x:Name="MacroPanel" Visibility="Collapsed" Height="45">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-                            <TextBlock x:Name="MacroStatusText" Text="GOTOWY DO NAGRYWANIA" VerticalAlignment="Center" Margin="15,0" FontSize="12" Opacity="0.8"/>
-                            <Button x:Name="RecordMacroButton" Grid.Column="1" Click="RecordMacro_Click" Style="{StaticResource GlassButtonStyle}" Width="150" Height="35" Margin="5">
-                                <TextBlock x:Name="RecordMacroButtonText" Text="NAGRAJ" FontFamily="{StaticResource MainFont}" FontSize="12"/>
+                        <Grid x:Name="MacroPanel" Visibility="Collapsed" Height="150">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            
+                            <TextBlock x:Name="MacroStatusText" Text="NACIŚNIJ FIZYCZNY PRZYCISK ABY NAGRAĆ" 
+                                       HorizontalAlignment="Center" Margin="5" FontSize="11" Foreground="#AAFFFFFF" FontWeight="Bold"/>
+                            
+                            <ScrollViewer Grid.Row="1" Margin="5" Background="#11FFFFFF">
+                                <ItemsControl x:Name="MacroSummaryList">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border BorderBrush="#22FFFFFF" BorderThickness="0,0,0,1" Padding="5">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock Text="{Binding Icon}" FontFamily="{StaticResource IconFont}" Margin="0,0,10,0" VerticalAlignment="Center" Opacity="0.7"/>
+                                                    <TextBlock Text="{Binding Description}" FontSize="11" VerticalAlignment="Center"/>
+                                                </StackPanel>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </ScrollViewer>
+
+                            <Button x:Name="RecordMacroButton" Grid.Row="2" Click="RecordMacro_Click" Style="{StaticResource GlassButtonStyle}" Height="30" Margin="5" Visibility="Collapsed">
+                                <TextBlock x:Name="RecordMacroButtonText" Text="STOP (LUB NACIŚNIJ PRZYCISK)" FontSize="10"/>
                             </Button>
                         </Grid>
                     </Grid>

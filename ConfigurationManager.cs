@@ -6,6 +6,7 @@ namespace KOYA_APP
     public class AppConfig
     {
         public bool IsFirstStart { get; set; } = true;
+        public string? GeminiKey { get; set; }
         public IStreamDeckAction?[] Actions { get; set; } = new IStreamDeckAction?[14];
     }
 
@@ -14,11 +15,16 @@ namespace KOYA_APP
         private static readonly string ConfigPath = Path.Combine(
             System.AppDomain.CurrentDomain.BaseDirectory, "config.json");
 
-        public static void SaveConfig(IStreamDeckAction?[] actions, bool isFirstStart = false)
+        public static void SaveConfig(IStreamDeckAction?[] actions, bool isFirstStart = false, string? geminiKey = null)
         {
             try
             {
-                var config = new AppConfig { Actions = actions, IsFirstStart = isFirstStart };
+                var config = new AppConfig 
+                { 
+                    Actions = actions, 
+                    IsFirstStart = isFirstStart,
+                    GeminiKey = geminiKey ?? LoadConfig().GeminiKey
+                };
                 var options = new JsonSerializerOptions { WriteIndented = true };
                 string json = JsonSerializer.Serialize(config, options);
                 File.WriteAllText(ConfigPath, json);

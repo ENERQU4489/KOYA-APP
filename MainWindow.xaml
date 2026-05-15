@@ -139,7 +139,7 @@
             </Border>
 
             <!-- Disconnection Overlay -->
-            <Grid x:Name="DisconnectedOverlay" Background="#EE000000" Visibility="Visible">
+            <Grid x:Name="DisconnectedOverlay" Background="#EE000000" Visibility="Visible" MouseLeftButtonUp="DisconnectedOverlay_Click">
                 <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
                     <TextBlock Text="&#xE7BA;" FontFamily="{StaticResource IconFont}" FontSize="64" Foreground="White" HorizontalAlignment="Center" Margin="0,0,0,20">
                         <TextBlock.Effect>
@@ -149,8 +149,8 @@
                     <TextBlock Text="PLEASE CONNECT" Foreground="White" FontSize="28" FontWeight="Bold" FontFamily="{StaticResource MainFont}" HorizontalAlignment="Center"/>
                     <TextBlock Text="KOYA STREAM DECK" Foreground="#88FFFFFF" FontSize="14" FontFamily="{StaticResource MainFont}" HorizontalAlignment="Center" Margin="0,5,0,0"/>
                     
-                    <Border BorderBrush="#33FFFFFF" BorderThickness="1" CornerRadius="4" Padding="20,10" Margin="0,40,0,0" HorizontalAlignment="Center">
-                        <TextBlock Text="WAITING FOR HARDWARE" Foreground="#44FFFFFF" FontSize="10" FontFamily="{StaticResource MainFont}"/>
+                    <Border BorderBrush="#33FFFFFF" BorderThickness="1" CornerRadius="4" Padding="20,10" Margin="0,40,0,0" HorizontalAlignment="Center" Cursor="Hand">
+                        <TextBlock Text="CLICK TO EDIT OFFLINE" Foreground="#AAFFFFFF" FontSize="12" FontWeight="Bold" FontFamily="{StaticResource MainFont}"/>
                     </Border>
                 </StackPanel>
             </Grid>

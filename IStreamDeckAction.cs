@@ -33,6 +33,8 @@ namespace KOYA_APP
     [JsonDerivedType(typeof(SpotifyLikeAction), typeDiscriminator: "SpotifyLike")]
     [JsonDerivedType(typeof(SpotifyOpenAction), typeDiscriminator: "SpotifyOpen")]
     [JsonDerivedType(typeof(MacroAction), typeDiscriminator: "Macro")]
+    [JsonDerivedType(typeof(SoundboardAction), typeDiscriminator: "Soundboard")]
+    [JsonDerivedType(typeof(AIAssistantAction), typeDiscriminator: "AIAssistant")]
     public interface IStreamDeckAction
     {
         string Name { get; }

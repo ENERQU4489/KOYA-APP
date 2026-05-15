@@ -7,19 +7,34 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Diagnostics;
 using System;
+using SharpHook;
 
 namespace KOYA_APP
 {
     public partial class ActionPicker : Window
+{
+    public IStreamDeckAction? SelectedAction { get; set; }
+    private List<byte> _capturedKeys = new List<byte>();
+
+    private List<MacroStep> _macroSteps = new List<MacroStep>();
+    private bool _isRecordingMacro = false;
+    private DateTime _lastMacroEventTime;
+    private TaskPoolGlobalHook? _globalHook;
+    private int _targetButtonIndex;
+    private HidBackend _hid;
+
+    public ActionPicker(int buttonIndex, HidBackend hid, bool isAnalog = false)
     {
-        public IStreamDeckAction? SelectedAction { get; set; }
-        private List<byte> _capturedKeys = new List<byte>();
+        InitializeComponent();
+        _targetButtonIndex = buttonIndex;
+        _hid = hid;
+        this.Closed += (s, e) => StopRecording();
 
-        public ActionPicker(bool isAnalog = false)
-        {
-            InitializeComponent();
+        // Słuchaj hardware'u do wyzwalania nagrywania
+        _hid.ButtonPressed += HandleHardwareButtonForMacro;
 
-            var allActions = new List<IStreamDeckAction>
+        var allActions = new List<IStreamDeckAction>
+
             {
                 new PlayPauseAction(),
                 new NextTrackAction(),
@@ -51,7 +66,9 @@ namespace KOYA_APP
                 new AppVolumeAction(),
                 new SpotifyLikeAction(),
                 new SpotifyOpenAction(),
-                new MacroAction()
+                new MacroAction(),
+                new SoundboardAction(),
+                new AIAssistantAction()
             };
 
             if (isAnalog)
@@ -76,6 +93,7 @@ namespace KOYA_APP
             DevicesComboBox.Visibility = Visibility.Collapsed;
             ShortcutTextBox.Visibility = Visibility.Collapsed;
             PasteTextInput.Visibility = Visibility.Collapsed;
+            MacroPanel.Visibility = Visibility.Collapsed;
 
             if (selected is SelectMicAction || selected is MuteMicrophoneAction)
             {
@@ -222,27 +240,32 @@ namespace KOYA_APP
             {
                 ExtraSettingsPanel.Visibility = Visibility.Visible;
                 MacroPanel.Visibility = Visibility.Visible;
-                ExtraSettingsTitle.Text = "Nagraj sekwencję klawiszy:";
+                ExtraSettingsTitle.Text = "Nagraj sekwencję (Klawiatura + Mysz):";
                 _macroSteps.Clear();
                 MacroStatusText.Text = "GOTOWY DO NAGRYWANIA";
             }
+            else if (selected is SoundboardAction sb)
+            {
+                ExtraSettingsPanel.Visibility = Visibility.Visible;
+                PasteTextInput.Visibility = Visibility.Visible;
+                ExtraSettingsTitle.Text = "Wybierz plik dźwiękowy (MP3/WAV) lub wpisz ścieżkę:";
+                PasteTextInput.Text = sb.FilePath;
+            }
         }
 
-        private List<MacroStep> _macroSteps = new List<MacroStep>();
-        private bool _isRecordingMacro = false;
-        private DateTime _lastMacroEventTime;
+        private void HandleHardwareButtonForMacro(int index)
+        {
+            if (index == _targetButtonIndex && ActionsListBox.SelectedItem is MacroAction)
+            {
+                Dispatcher.Invoke(() => RecordMacro_Click(this, new RoutedEventArgs()));
+            }
+        }
 
         private void RecordMacro_Click(object sender, RoutedEventArgs e)
         {
             if (!_isRecordingMacro)
             {
-                _isRecordingMacro = true;
-                _macroSteps.Clear();
-                _lastMacroEventTime = DateTime.Now;
-                RecordMacroButtonText.Text = "STOP";
-                MacroStatusText.Text = "NAGRYWANIE... (Wciskaj klawisze)";
-                this.PreviewKeyDown += ActionPicker_PreviewKeyDown;
-                this.PreviewKeyUp += ActionPicker_PreviewKeyUp;
+                StartGlobalRecording();
             }
             else
             {
@@ -250,46 +273,142 @@ namespace KOYA_APP
             }
         }
 
-        private void StopRecording()
+        private void StartGlobalRecording()
         {
-            _isRecordingMacro = false;
-            RecordMacroButtonText.Text = "NAGRAJ";
-            MacroStatusText.Text = $"ZAPISANO {_macroSteps.Count} KROKÓW";
-            this.PreviewKeyDown -= ActionPicker_PreviewKeyDown;
-            this.PreviewKeyUp -= ActionPicker_PreviewKeyUp;
+            _isRecordingMacro = true;
+            _macroSteps.Clear();
+            _lastMacroEventTime = DateTime.Now;
+            RecordMacroButtonText.Text = "STOP (LUB NACIŚNIJ PRZYCISK)";
+            RecordMacroButton.Visibility = Visibility.Visible;
+            MacroStatusText.Text = "NAGRYWANIE W TOKU...";
+            MacroSummaryList.Items.Clear();
+
+            _globalHook = new TaskPoolGlobalHook();
+            
+            _globalHook.KeyPressed += (s, e) => AddGlobalKeyStep(e, true);
+            _globalHook.KeyReleased += (s, e) => AddGlobalKeyStep(e, false);
+            
+            _globalHook.MouseMoved += (s, e) => AddGlobalMouseStep(e, MacroStepType.MouseMove, false);
+            _globalHook.MousePressed += (s, e) => AddGlobalMouseStep(e, MacroStepType.MouseButton, true);
+            _globalHook.MouseReleased += (s, e) => AddGlobalMouseStep(e, MacroStepType.MouseButton, false);
+
+            _globalHook.RunAsync();
         }
 
-        private void ActionPicker_PreviewKeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        private void AddGlobalMouseStep(MouseHookEventArgs e, MacroStepType type, bool isDown)
         {
             if (!_isRecordingMacro) return;
-            e.Handled = true;
-            AddMacroStep(e.Key, true);
+            
+            var now = DateTime.Now;
+            int delay = (int)(now - _lastMacroEventTime).TotalMilliseconds;
+            _lastMacroEventTime = now;
+
+            var step = new MacroStep
+            {
+                Type = type,
+                X = e.Data.X,
+                Y = e.Data.Y,
+                Button = (int)e.Data.Button,
+                IsDown = isDown,
+                DelayMs = delay
+            };
+
+            lock (_macroSteps) _macroSteps.Add(step);
+            UpdateSummaryUI(step);
         }
 
-        private void ActionPicker_PreviewKeyUp(object sender, System.Windows.Input.KeyEventArgs e)
+        private void AddGlobalKeyStep(KeyboardHookEventArgs e, bool isDown)
         {
             if (!_isRecordingMacro) return;
-            e.Handled = true;
-            AddMacroStep(e.Key, false);
-        }
-
-        private void AddMacroStep(Key key, bool isDown)
-        {
-            int vk = KeyInterop.VirtualKeyFromKey(key);
-            if (vk == 0) return;
 
             var now = DateTime.Now;
             int delay = (int)(now - _lastMacroEventTime).TotalMilliseconds;
             _lastMacroEventTime = now;
 
-            _macroSteps.Add(new MacroStep
-            {
-                KeyCode = (byte)vk,
-                IsKeyDown = isDown,
-                DelayMs = delay
-            });
+            byte vk = (byte)e.Data.RawCode; 
 
-            MacroStatusText.Text = $"NAGRYWANIE: {_macroSteps.Count} KROKÓW...";
+            var step = new MacroStep
+            {
+                Type = MacroStepType.Keyboard,
+                KeyCode = vk,
+                IsDown = isDown,
+                DelayMs = delay
+            };
+
+            lock (_macroSteps) _macroSteps.Add(step);
+            UpdateSummaryUI(step);
+        }
+
+        private int _moveCount = 0;
+
+        private void UpdateSummaryUI(MacroStep step)
+        {
+            Dispatcher.Invoke(() => {
+                MacroStatusText.Text = $"NAGRANO: {_macroSteps.Count} ZDARZEŃ";
+                
+                if (step.Type == MacroStepType.MouseMove)
+                {
+                    _moveCount++;
+                    if (_moveCount % 10 == 0) 
+                    {
+                        var lastItem = MacroSummaryList.Items.Cast<dynamic>().LastOrDefault();
+                        if (lastItem != null && (MacroStepType)lastItem.Type == MacroStepType.MouseMove)
+                        {
+                            var newItem = new {
+                                Type = MacroStepType.MouseMove,
+                                Icon = "\uE961",
+                                Description = $"Ruch myszy -> {step.X}, {step.Y} ({_moveCount} pkt)"
+                            };
+                            int index = MacroSummaryList.Items.Count - 1;
+                            MacroSummaryList.Items.RemoveAt(index);
+                            MacroSummaryList.Items.Add(newItem);
+                            return;
+                        }
+                    }
+                    else if (_moveCount > 1) return;
+                }
+                else
+                {
+                    _moveCount = 0;
+                }
+
+                MacroSummaryList.Items.Add(new {
+                    Type = step.Type,
+                    Icon = GetStepIcon(step),
+                    Description = GetStepDescription(step)
+                });
+
+                if (MacroSummaryList.Items.Count > 50) MacroSummaryList.Items.RemoveAt(0);
+            });
+        }
+
+        private string GetStepIcon(MacroStep step) => step.Type switch {
+            MacroStepType.Keyboard => "\uE765",
+            MacroStepType.MouseButton => "\uE962",
+            MacroStepType.MouseMove => "\uE961",
+            _ => "\uE10C"
+        };
+
+        private string GetStepDescription(MacroStep step) => step.Type switch {
+            MacroStepType.Keyboard => $"{(step.IsDown ? "Wciśnięto" : "Zwolniono")} klawisz (0x{step.KeyCode:X})",
+            MacroStepType.MouseButton => $"{(step.IsDown ? "Kliknięto" : "Zwolniono")} przycisk myszy {step.Button}",
+            MacroStepType.MouseMove => $"Ruch myszy -> {step.X}, {step.Y}",
+            _ => "Nieznana akcja"
+        };
+
+        private void StopRecording()
+        {
+            if (!_isRecordingMacro) return;
+            _isRecordingMacro = false;
+            
+            _globalHook?.Dispose();
+            _globalHook = null;
+
+            Dispatcher.Invoke(() => {
+                RecordMacroButtonText.Text = "NAGRAJ";
+                RecordMacroButton.Visibility = Visibility.Collapsed;
+                MacroStatusText.Text = $"ZAPISANO {_macroSteps.Count} KROKÓW";
+            });
         }
 
         private void ShortcutTextBox_PreviewKeyDown(object sender, System.Windows.Input.KeyEventArgs e)
@@ -392,12 +511,10 @@ namespace KOYA_APP
             }
             else if (selected is MultiAction multi)
             {
-                // Kaskadowe dodawanie akcji do MultiAction
                 bool adding = true;
                 while (adding)
                 {
-                    ActionPicker subPicker = new ActionPicker(false) { Owner = this };
-                    // Ukrywamy MultiAction w pod-pickerze, żeby uniknąć nieskończonej rekurencji
+                    ActionPicker subPicker = new ActionPicker(_targetButtonIndex, _hid, false) { Owner = this };
                     var currentList = (subPicker.ActionsListBox.ItemsSource as List<IStreamDeckAction>);
                     if (currentList != null)
                     {
@@ -417,6 +534,19 @@ namespace KOYA_APP
                 if (multi.Actions.Count > 0)
                 {
                     SelectedAction = multi;
+                }
+            }
+            else if (selected is SoundboardAction sbAction)
+            {
+                if (string.IsNullOrEmpty(PasteTextInput.Text))
+                {
+                    Microsoft.Win32.OpenFileDialog ofd = new Microsoft.Win32.OpenFileDialog { Filter = "Audio Files (*.mp3, *.wav)|*.mp3;*.wav" };
+                    if (ofd.ShowDialog() == true) { sbAction.FilePath = ofd.FileName; SelectedAction = sbAction; }
+                }
+                else
+                {
+                    sbAction.FilePath = PasteTextInput.Text;
+                    SelectedAction = sbAction;
                 }
             }
             else { SelectedAction = selected; }
