@@ -6,6 +6,7 @@ namespace KOYA_APP
     {
         public string Name => "Powiekszenie";
         public string Icon => "\uE1A3";
+        public string Category => "Internet & Aplikacje";
         public string Description => "Kontrola powiekszenia (Zoom)";
 
         public void Execute() { keybd_event(0x11, 0, 0, 0); keybd_event(0x30, 0, 0, 0); keybd_event(0x30, 0, 2, 0); keybd_event(0x11, 0, 2, 0); }

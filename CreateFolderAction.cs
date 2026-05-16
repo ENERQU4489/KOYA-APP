@@ -7,6 +7,7 @@ namespace KOYA_APP
     {
         public string Name => "Utwórz Folder";
         public string Icon => "\uE8B7"; // Ikona folderu
+        public string Category => "Automatyzacja & Narzędzia";
         public string Description => $"Tworzy folder: {FolderPath}";
         public string? FolderPath { get; set; }
 

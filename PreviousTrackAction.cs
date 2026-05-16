@@ -6,7 +6,8 @@ namespace KOYA_APP
     {
         public string Name => "Poprzedni Utwor";
         public string Icon => "\uE100";
-        public string Description => "Cofa utwor";
+        public string Category => "Multimedia & Audio";
+        public string Description => "Wraca do utworu";
 
         public void Execute()
         {

@@ -6,6 +6,7 @@ namespace KOYA_APP
     {
         public string Name => "Przelacz Okno";
         public string Icon => "\uE117";
+        public string Category => "System & Okna";
         public string Description => "Szybki Alt+Tab";
 
         [DllImport("user32.dll")]

@@ -6,6 +6,7 @@ namespace KOYA_APP
     {
         public string Name => "Nastepny Utwor";
         public string Icon => "\uE101";
+        public string Category => "Multimedia & Audio";
         public string Description => "Przelacza utwor";
 
         public void Execute()

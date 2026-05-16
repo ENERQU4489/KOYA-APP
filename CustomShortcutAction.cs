@@ -8,6 +8,7 @@ namespace KOYA_APP
     {
         public string Name { get; set; } = "Skrot klawiszowy";
         public string Icon => "\uE144";
+        public string Category => "Automatyzacja & Narzędzia";
         public string Description => $"Wykonuje: {KeysDisplay}";
         public string KeysDisplay { get; set; } = "Nieustawiony";
         

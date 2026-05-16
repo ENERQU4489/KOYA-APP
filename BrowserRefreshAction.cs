@@ -6,6 +6,7 @@ namespace KOYA_APP
     {
         public string Name => "Odśwież (WWW)";
         public string Icon => "\uE72C";
+        public string Category => "Internet & Aplikacje";
         public string Description => "Odśwież stronę w przeglądarce";
 
         public void Execute()

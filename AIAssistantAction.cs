@@ -7,6 +7,7 @@ namespace KOYA_APP
         public string Name => "AI Assistant";
         public string Description => "Otwórz okno asystenta AI";
         public string Icon => "\uE946"; // Info/Brain icon
+        public string Category => "Automatyzacja & Narzędzia";
 
         public void Execute()
         {

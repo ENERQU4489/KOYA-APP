@@ -6,6 +6,7 @@ namespace KOYA_APP
     {
         public string Name => "Zamknij Okno";
         public string Icon => "\uE10A";
+        public string Category => "System & Okna";
         public string Description => "Alt+F4";
 
         public void Execute()

@@ -278,13 +278,6 @@
                 <Setter Property="BorderThickness" Value="0"/>
                 <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto"/>
                 <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled"/>
-                <Setter Property="ItemsPanel">
-                    <Setter.Value>
-                        <ItemsPanelTemplate>
-                            <WrapPanel IsItemsHost="True" HorizontalAlignment="Center"/>
-                        </ItemsPanelTemplate>
-                    </Setter.Value>
-                </Setter>
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="ListBox">
@@ -325,13 +318,13 @@
                     <Setter.Value>
                         <Style TargetType="ListBoxItem">
                             <Setter Property="Background" Value="#0AFFFFFF"/>
-                            <Setter Property="Margin" Value="10"/>
+                            <Setter Property="Margin" Value="8"/>
                             <Setter Property="Template">
                                 <Setter.Value>
                                     <ControlTemplate TargetType="ListBoxItem">
                                         <Border x:Name="itemBorder" Background="{TemplateBinding Background}" 
                                                 BorderThickness="1" BorderBrush="#11FFFFFF"
-                                                Width="160" Height="160" CornerRadius="10">
+                                                Width="145" Height="145" CornerRadius="10">
                                             <ContentPresenter />
                                         </Border>
                                         <ControlTemplate.Triggers>

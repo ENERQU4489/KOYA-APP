@@ -6,6 +6,7 @@ namespace KOYA_APP
     {
         public string Name => "Glosnosc";
         public string Icon => "\uE15D";
+        public string Category => "Multimedia & Audio";
         public string Description => "Glowna glosnosc systemu";
 
         public void Execute() { keybd_event(0xAD, 0, 0, 0); keybd_event(0xAD, 0, 2, 0); }

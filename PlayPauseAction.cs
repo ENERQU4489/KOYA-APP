@@ -6,6 +6,7 @@ namespace KOYA_APP
     {
         public string Name => "Play/Pause";
         public string Icon => "\uE102";
+        public string Category => "Multimedia & Audio";
         public string Description => "Odtwarzaj/Pauza";
 
         public void Execute()

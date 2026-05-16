@@ -6,6 +6,7 @@ namespace KOYA_APP
     {
         public string Name => "Otwórz Link";
         public string Icon => "\uE71B"; // Ikona kuli ziemskiej / linku
+        public string Category => "Internet & Aplikacje";
         public string Description => $"Otwiera: {Url}";
         public string? Url { get; set; }
 

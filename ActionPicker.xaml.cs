@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Input;
 using System.Diagnostics;
 using System;
@@ -30,11 +31,9 @@ namespace KOYA_APP
         _hid = hid;
         this.Closed += (s, e) => StopRecording();
 
-        // Słuchaj hardware'u do wyzwalania nagrywania
         _hid.ButtonPressed += HandleHardwareButtonForMacro;
 
-        var allActions = new List<IStreamDeckAction>
-
+        _allActions = new List<IStreamDeckAction>
             {
                 new PlayPauseAction(),
                 new NextTrackAction(),
@@ -68,22 +67,55 @@ namespace KOYA_APP
                 new SpotifyOpenAction(),
                 new MacroAction(),
                 new SoundboardAction(),
-                new AIAssistantAction()
-            };
+                new AIAssistantAction(),
+                new FanSpeedAction(),
+                new RgbColorAction(),
+                new RgbLightAction()
+                };
 
-            if (isAnalog)
-            {
-                ActionsListBox.ItemsSource = allActions.Where(a => 
+                if (isAnalog)
+                {
+                _allActions = _allActions.Where(a => 
                     a is VolumeAction || 
                     a is BrightnessAction ||
                     a is MuteMicrophoneAction || 
                     a is WebZoomAction || 
-                    a is AppVolumeAction).ToList();
-            }
-            else
+                    a is AppVolumeAction ||
+                    a is FanSpeedAction ||
+                    a is RgbColorAction ||
+                    a is RgbLightAction).ToList();
+                }            else
             {
-                ActionsListBox.ItemsSource = allActions.Where(a => !(a is BrightnessAction)).ToList();
+                _allActions = _allActions.Where(a => !(a is BrightnessAction)).ToList();
             }
+
+            ApplyFilter();
+        }
+
+        private List<IStreamDeckAction> _allActions;
+
+        private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            ApplyFilter();
+        }
+
+        private void ApplyFilter()
+        {
+            if (_allActions == null || ActionsListBox == null) return;
+
+            string query = SearchBox.Text.ToLower();
+
+            var filtered = _allActions.Where(a => {
+                return string.IsNullOrEmpty(query) || 
+                       a.Name.ToLower().Contains(query) || 
+                       a.Description.ToLower().Contains(query) ||
+                       a.Category.ToLower().Contains(query);
+            }).ToList();
+
+            var view = CollectionViewSource.GetDefaultView(filtered);
+            view.GroupDescriptions.Clear();
+            view.GroupDescriptions.Add(new PropertyGroupDescription("Category"));
+            ActionsListBox.ItemsSource = view;
         }
 
         private void ActionsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -94,7 +126,10 @@ namespace KOYA_APP
             ShortcutTextBox.Visibility = Visibility.Collapsed;
             PasteTextPanel.Visibility = Visibility.Collapsed;
             BrowseFileButton.Visibility = Visibility.Collapsed;
+            ValueSliderPanel.Visibility = Visibility.Collapsed;
             MacroPanel.Visibility = Visibility.Collapsed;
+
+            if (selected == null) return;
 
             if (selected is SelectMicAction || selected is MuteMicrophoneAction)
             {
@@ -212,9 +247,11 @@ namespace KOYA_APP
             else if (selected is PasteTextAction pt)
             {
                 ExtraSettingsPanel.Visibility = Visibility.Visible;
-                PasteTextInput.Visibility = Visibility.Visible;
+                PasteTextPanel.Visibility = Visibility.Visible;
+                BrowseFileButton.Visibility = Visibility.Collapsed;
                 ExtraSettingsTitle.Text = "Wpisz tekst do wklejenia:";
                 PasteTextInput.Text = pt.TextToPaste;
+                PasteTextInput.Focus();
             }
             else if (selected is OpenAppAction appAction)
             {
@@ -223,13 +260,16 @@ namespace KOYA_APP
                 BrowseFileButton.Visibility = Visibility.Visible;
                 ExtraSettingsTitle.Text = "Wybierz aplikację (.exe) lub wpisz ścieżkę:";
                 PasteTextInput.Text = appAction.Path;
+                PasteTextInput.Focus();
             }
             else if (selected is OpenLinkAction ol)
             {
                 ExtraSettingsPanel.Visibility = Visibility.Visible;
                 PasteTextPanel.Visibility = Visibility.Visible;
+                BrowseFileButton.Visibility = Visibility.Collapsed;
                 ExtraSettingsTitle.Text = "Wpisz adres URL (np. https://google.com):";
                 PasteTextInput.Text = ol.Url;
+                PasteTextInput.Focus();
             }
             else if (selected is CreateFolderAction cf)
             {
@@ -238,6 +278,7 @@ namespace KOYA_APP
                 BrowseFileButton.Visibility = Visibility.Visible;
                 ExtraSettingsTitle.Text = "Wpisz ścieżkę folderu lub wybierz ikonę folderu:";
                 PasteTextInput.Text = cf.FolderPath;
+                PasteTextInput.Focus();
             }
             else if (selected is PowerShellAction ps)
             {
@@ -246,6 +287,7 @@ namespace KOYA_APP
                 BrowseFileButton.Visibility = Visibility.Visible;
                 ExtraSettingsTitle.Text = "Wpisz komende lub sciezke do skryptu (.ps1):";
                 PasteTextInput.Text = ps.ScriptContent;
+                PasteTextInput.Focus();
             }
             else if (selected is MacroAction)
             {
@@ -255,6 +297,30 @@ namespace KOYA_APP
                 _macroSteps.Clear();
                 MacroStatusText.Text = "GOTOWY DO NAGRYWANIA";
             }
+            else if (selected is FanSpeedAction fs)
+            {
+                ExtraSettingsPanel.Visibility = Visibility.Visible;
+                ValueSliderPanel.Visibility = Visibility.Visible;
+                ValueSlider.Maximum = 100;
+                ValueSlider.Value = fs.Value;
+                ExtraSettingsTitle.Text = "Wybierz stałą prędkość wentylatora (%):";
+            }
+            else if (selected is RgbColorAction rc)
+            {
+                ExtraSettingsPanel.Visibility = Visibility.Visible;
+                ValueSliderPanel.Visibility = Visibility.Visible;
+                ValueSlider.Maximum = 360;
+                ValueSlider.Value = rc.Value;
+                ExtraSettingsTitle.Text = "Wybierz stały odcień RGB (HUE):";
+            }
+            else if (selected is RgbLightAction rl)
+            {
+                ExtraSettingsPanel.Visibility = Visibility.Visible;
+                ValueSliderPanel.Visibility = Visibility.Visible;
+                ValueSlider.Maximum = 100;
+                ValueSlider.Value = rl.Value;
+                ExtraSettingsTitle.Text = "Wybierz stałą jasność RGB (%):";
+            }
             else if (selected is SoundboardAction sb)
             {
                 ExtraSettingsPanel.Visibility = Visibility.Visible;
@@ -262,6 +328,7 @@ namespace KOYA_APP
                 BrowseFileButton.Visibility = Visibility.Visible;
                 ExtraSettingsTitle.Text = "Wybierz plik dźwiękowy (MP3/WAV) lub wpisz ścieżkę:";
                 PasteTextInput.Text = sb.FilePath;
+                PasteTextInput.Focus();
             }
         }
 
@@ -313,7 +380,7 @@ namespace KOYA_APP
             _isRecordingMacro = true;
             _macroSteps.Clear();
             _lastMacroEventTime = DateTime.Now;
-            RecordMacroButtonText.Text = "STOP (LUB NACIŚNIJ PRZYCISK)";
+            RecordMacroButton.Content = "STOP (LUB NACIŚNIJ PRZYCISK)";
             RecordMacroButton.Visibility = Visibility.Visible;
             MacroStatusText.Text = "NAGRYWANIE W TOKU...";
             MacroSummaryList.Items.Clear();
@@ -440,7 +507,7 @@ namespace KOYA_APP
             _globalHook = null;
 
             Dispatcher.Invoke(() => {
-                RecordMacroButtonText.Text = "NAGRAJ";
+                RecordMacroButton.Content = "NAGRAJ";
                 RecordMacroButton.Visibility = Visibility.Collapsed;
                 MacroStatusText.Text = $"ZAPISANO {_macroSteps.Count} KROKÓW";
             });
@@ -521,6 +588,21 @@ namespace KOYA_APP
             {
                 psAction.ScriptContent = PasteTextInput.Text;
                 SelectedAction = psAction;
+            }
+            else if (selected is FanSpeedAction fsAction)
+            {
+                fsAction.Value = (int)ValueSlider.Value;
+                SelectedAction = fsAction;
+            }
+            else if (selected is RgbColorAction rcAction)
+            {
+                rcAction.Value = (int)ValueSlider.Value;
+                SelectedAction = rcAction;
+            }
+            else if (selected is RgbLightAction rlAction)
+            {
+                rlAction.Value = (int)ValueSlider.Value;
+                SelectedAction = rlAction;
             }
             else if (selected is MacroAction macro)
             {

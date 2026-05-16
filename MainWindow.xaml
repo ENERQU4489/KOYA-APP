@@ -4,7 +4,12 @@
         Title="KOYA" Height="600" Width="1100"
         Background="Transparent" WindowStyle="None" AllowsTransparency="True" 
         WindowStartupLocation="CenterScreen" ShowInTaskbar="True" Topmost="True"
-        Icon="Assets/logo.png">
+        Icon="Assets/logo.png"
+        TextOptions.TextFormattingMode="Display"
+        TextOptions.TextRenderingMode="Auto"
+        RenderOptions.BitmapScalingMode="HighQuality"
+        UseLayoutRounding="True"
+        SnapsToDevicePixels="True">
     
     <Border x:Name="WindowBorder" CornerRadius="12" BorderThickness="1.5" 
             TextElement.FontFamily="{StaticResource MainFont}" TextElement.Foreground="White">

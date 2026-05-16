@@ -6,6 +6,7 @@ namespace KOYA_APP
     {
         public string Name => "Wybierz Mikrofon";
         public string Icon => "\uE1F6";
+        public string Category => "Multimedia & Audio";
         public string Description => $"Ustawia: {DeviceName}";
         public string? DeviceID { get; set; }
         public string? DeviceName { get; set; }

@@ -9,6 +9,7 @@ namespace KOYA_APP
         public string Name { get; set; } = "Soundboard";
         public string Description { get; set; } = "Odtwórz dźwięk";
         public string Icon => "\uE7F6"; // Volume icon
+        public string Category => "Multimedia & Audio";
         public string FilePath { get; set; } = "";
 
         public void Execute()

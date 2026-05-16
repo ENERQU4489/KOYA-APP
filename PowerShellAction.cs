@@ -7,6 +7,7 @@ namespace KOYA_APP
     {
         public string Name { get; set; } = "Skrypt PowerShell";
         public string Icon => "\uE756"; // Ikona terminala/kodu
+        public string Category => "Automatyzacja & Narzędzia";
         public string Description { get; set; } = "Uruchamia skrypt lub komendę PowerShell";
         
         public string ScriptContent { get; set; } = "";

@@ -11,6 +11,7 @@ namespace KOYA_APP
         public string Name => "Spotify: Polub";
         public string Description => "Lubię to! (Spotify)";
         public string Icon => "\uEB52"; // Heart icon
+        public string Category => "Multimedia & Audio";
 
         public void Execute()
         {

@@ -11,6 +11,7 @@ namespace KOYA_APP
         
         [JsonIgnore]
         public string Icon => "\uE706";
+        public string Category => "System & Okna";
         public string Description { get; set; } = "Reguluj jasność ekranu";
 
         public string? MonitorId { get; set; }

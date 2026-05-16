@@ -10,6 +10,7 @@ namespace KOYA_APP
         public string Name { get; set; } = "Wklej Tekst";
         public string Description { get; set; } = "Wkleja zdefiniowany tekst w miejscu kursora.";
         public string Icon => "\uE77F;"; // Ikona notatki/tekstu
+        public string Category => "Automatyzacja & Narzędzia";
         
         public string TextToPaste { get; set; } = "";
 

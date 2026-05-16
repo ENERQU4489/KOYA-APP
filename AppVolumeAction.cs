@@ -7,6 +7,7 @@ namespace KOYA_APP
     {
         public string Name { get; set; } = "Glosnosc Aplikacji";
         public string Icon => "\uE767";
+        public string Category => "Multimedia & Audio";
         public string Description { get; set; } = "Kontroluj glosnosc konkretnej aplikacji";
         
         public int ProcessId { get; set; }

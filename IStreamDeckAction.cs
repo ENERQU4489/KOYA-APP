@@ -35,11 +35,15 @@ namespace KOYA_APP
     [JsonDerivedType(typeof(MacroAction), typeDiscriminator: "Macro")]
     [JsonDerivedType(typeof(SoundboardAction), typeDiscriminator: "Soundboard")]
     [JsonDerivedType(typeof(AIAssistantAction), typeDiscriminator: "AIAssistant")]
+    [JsonDerivedType(typeof(FanSpeedAction), typeDiscriminator: "FanSpeed")]
+    [JsonDerivedType(typeof(RgbColorAction), typeDiscriminator: "RgbColor")]
+    [JsonDerivedType(typeof(RgbLightAction), typeDiscriminator: "RgbLight")]
     public interface IStreamDeckAction
     {
         string Name { get; }
         string Description { get; }
         string Icon { get; }
+        string Category { get; }
         void Execute(); // Dla klikniecia
         void ExecuteAnalog(bool direction); // true = w prawo / glosniej, false = w lewo / ciszej
     }

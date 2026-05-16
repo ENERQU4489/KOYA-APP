@@ -6,6 +6,7 @@ namespace KOYA_APP
     {
         public string Name => "Wyłącz PC";
         public string Icon => "\uE7E8"; // Ikona Power / Shutdown
+        public string Category => "System & Okna";
         public string Description => "Natychmiast wyłącza komputer";
 
         public void Execute()

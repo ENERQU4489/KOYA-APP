@@ -5,8 +5,9 @@ namespace KOYA_APP
     public class MuteSpeakerAction : IStreamDeckAction
     {
         public string Name => "Mute Glosniki";
-        public string Icon => "\uE15D";
-        public string Description => "Wycisza glosniki";
+        public string Icon => "\uE74F";
+        public string Category => "Multimedia & Audio";
+        public string Description => "Wycisz/Odcisz glosniki";
 
         public void Execute()
         {

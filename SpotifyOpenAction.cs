@@ -8,6 +8,7 @@ namespace KOYA_APP
         public string Name => "Spotify: Otwórz";
         public string Description => "Pokaż okno Spotify";
         public string Icon => "\uE189"; // Music icon
+        public string Category => "Multimedia & Audio";
 
         public void Execute()
         {

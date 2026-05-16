@@ -7,6 +7,7 @@ namespace KOYA_APP
     {
         public string Name { get; set; } = "Multi-Action";
         public string Icon => "\uE10E"; // Ikona listy / warstw
+        public string Category => "Automatyzacja & Narzędzia";
         public string Description => $"{Actions.Count} akcji w sekwencji";
         
         public List<IStreamDeckAction> Actions { get; set; } = new List<IStreamDeckAction>();

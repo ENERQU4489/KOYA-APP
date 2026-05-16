@@ -6,6 +6,7 @@ namespace KOYA_APP
     {
         public string Name => "Menedzer Zadan";
         public string Icon => "\uE136";
+        public string Category => "System & Okna";
         public string Description => "Otwiera taskmgr";
 
         public void Execute()

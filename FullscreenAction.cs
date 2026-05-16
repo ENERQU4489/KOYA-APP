@@ -6,6 +6,7 @@ namespace KOYA_APP
     {
         public string Name => "Pelny Ekran";
         public string Icon => "\uE1D9";
+        public string Category => "System & Okna";
         public string Description => "Klawisz F11";
 
         public void Execute()

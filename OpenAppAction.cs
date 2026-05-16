@@ -6,6 +6,7 @@ namespace KOYA_APP
     {
         public string Name => "Otworz Aplikacje";
         public string Icon => "\uE1A5";
+        public string Category => "Internet & Aplikacje";
         public string Description => $"Odpala: {Path}";
         public string? Path { get; set; }
 

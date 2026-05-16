@@ -6,6 +6,7 @@ namespace KOYA_APP
     {
         public string Name => "Wycisz Mikrofon";
         public string Icon => "\uE1D6";
+        public string Category => "Multimedia & Audio";
         public string Description => "Przelacz mikrofon (Wl/Wyl)";
 
         public string? DeviceId { get; set; }

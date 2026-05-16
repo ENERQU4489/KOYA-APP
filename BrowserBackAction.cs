@@ -6,6 +6,7 @@ namespace KOYA_APP
     {
         public string Name => "Wstecz (WWW)";
         public string Icon => "\uE72B";
+        public string Category => "Internet & Aplikacje";
         public string Description => "Poprzednia strona w przeglądarce";
 
         public void Execute()

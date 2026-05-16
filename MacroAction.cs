@@ -10,6 +10,7 @@ namespace KOYA_APP
     {
         public string Name { get; set; } = "Makro (Zaawansowane)";
         public string Icon => "\uE7C8";
+        public string Category => "Automatyzacja & Narzędzia";
         public string Description => $"Sekwencja {Steps.Count} zdarzeń (KBD/Mysz)";
         
         public List<MacroStep> Steps { get; set; } = new List<MacroStep>();

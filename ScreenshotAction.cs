@@ -6,6 +6,7 @@ namespace KOYA_APP
     {
         public string Name => "Zrzut Ekranu";
         public string Icon => "\uE158";
+        public string Category => "System & Okna";
         public string Description => "Wykonuje zrzut calego ekranu";
 
         public void Execute()

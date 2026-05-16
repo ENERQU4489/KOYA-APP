@@ -44,9 +44,9 @@ namespace KOYA_APP
         private async Task<string> GetGeminiResponse(string prompt, List<string> filePaths, byte[]? screenshotBytes)
         {
             var attempts = new[] {
+                new { Ver = "v1beta", Model = "gemini-2.5-flash" },
                 new { Ver = "v1beta", Model = "gemini-2.0-flash" },
-                new { Ver = "v1beta", Model = "gemini-1.5-flash" },
-                new { Ver = "v1", Model = "gemini-1.5-flash" }
+                new { Ver = "v1beta", Model = "gemini-1.5-flash" }
             };
 
             string lastError = "";
@@ -159,9 +159,9 @@ namespace KOYA_APP
 
                 var body = new {
                     model = "gpt-4o",
-                    messages = new[] {
-                        new { role = "system", content = "Jesteś KOYA AI - asystentem technicznym." },
-                        new { role = "user", content = userContent }
+                    messages = new object[] {
+                        new { role = "system", content = (object)"Jesteś KOYA AI - asystentem technicznym." },
+                        new { role = "user", content = (object)userContent }
                     }
                 };
 
