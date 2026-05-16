@@ -81,13 +81,31 @@ namespace KOYA_APP
             ShowNotification("\uEA8F", "Notifications", _enablePopups ? "Enabled" : "Disabled");
         }
 
+        private NotificationWindow? _activeNotification;
+        private string? _lastNotificationName;
+
         private void ShowNotification(string icon, string name, string description)
         {
             if (!_enablePopups) return;
             
             Dispatcher.Invoke(() => {
-                var notify = new NotificationWindow(icon, name, description);
-                notify.Show();
+                // Jeśli to ta sama akcja (np. ciągła zmiana głośności), aktualizujemy istniejące okno
+                if (_activeNotification != null && _activeNotification.IsLoaded && _lastNotificationName == name)
+                {
+                    _activeNotification.UpdateContent(description);
+                }
+                else
+                {
+                    // Jeśli stare okno jeszcze istnieje ale nazwa inna, zamykamy je
+                    if (_activeNotification != null) { try { _activeNotification.Close(); } catch {} }
+
+                    _activeNotification = new NotificationWindow(icon, name, description);
+                    _lastNotificationName = name;
+                    _activeNotification.Closed += (s, e) => {
+                        if (_activeNotification == (NotificationWindow)s!) _activeNotification = null;
+                    };
+                    _activeNotification.Show();
+                }
             });
         }
 
@@ -128,18 +146,19 @@ namespace KOYA_APP
                 {
                     using (var waveOut = new NAudio.Wave.WaveOutEvent())
                     {
+                        // Tactile mechanical click: Lower frequency (400Hz), very short (15ms)
                         var signal = new NAudio.Wave.SampleProviders.SignalGenerator(44100, 1)
                         {
                             Type = NAudio.Wave.SampleProviders.SignalGeneratorType.Sin,
-                            Frequency = 1000,
-                            Gain = 0.1
-                        }.Take(TimeSpan.FromMilliseconds(20));
+                            Frequency = 400,
+                            Gain = 0.08
+                        }.Take(TimeSpan.FromMilliseconds(15));
 
                         waveOut.Init(signal);
                         waveOut.Play();
                         while (waveOut.PlaybackState == NAudio.Wave.PlaybackState.Playing)
                         {
-                            Thread.Sleep(5);
+                            Thread.Sleep(2);
                         }
                     }
                 });
@@ -181,9 +200,6 @@ namespace KOYA_APP
         {
             _hidBackend.ButtonPressed += (index) =>
             {
-                // Ignorujemy sygnały przez pierwsze 2 sekundy po podłączeniu
-                if (!IsHardwareStable) return;
-
                 System.Windows.Application.Current.Dispatcher.BeginInvoke(new Action(async () =>
                 {
                     if (index >= 0 && index < _buttonActions.Length)
@@ -192,13 +208,11 @@ namespace KOYA_APP
                         
                         if (action != null)
                         {
-                            // Wykonaj akcję
                             action.Execute();
                             PlayClickSound();
                             ShowNotification(action.Icon, action.Name, "Akcja wykonana");
                         }
                         
-                        // Wizualny feedback (Podświetlenie) zawsze, gdy naciśnięty fizyczny przycisk
                         if (_buttonCache.TryGetValue(index.ToString(), out var btn))
                         {
                             var originalBackground = btn.Background;
@@ -231,16 +245,30 @@ namespace KOYA_APP
                             action.ExecuteAbsolute(value);
                         }
                         
-                        // Update UI Knob rotation
+                        // Update UI Knob rotation and Text
                         if (_buttonCache.TryGetValue(index.ToString(), out var btn))
                         {
-                            var transform = btn.Template.FindName("pointer", btn) as FrameworkElement;
-                            if (transform != null)
+                            btn.ApplyTemplate();
+                            if (btn.Template != null)
                             {
-                                // Map 0-255 to -150 to 150 degrees (example range for a pot)
-                                double angle = (value / 255.0) * 300.0 - 150.0;
-                                transform.RenderTransform = new System.Windows.Media.RotateTransform(angle);
-                            }
+                                // 1. Update Pointer Rotation
+                                var transform = btn.Template.FindName("pointer", btn) as FrameworkElement;
+                                if (transform != null)
+                                {
+                                    double angle = (value / 255.0) * 300.0 - 150.0;
+                                    transform.RenderTransform = new System.Windows.Media.RotateTransform(angle);
+                                }
+
+                                // 2. Update Percentage Text
+                                var valueText = btn.Template.FindName("valueText", btn) as TextBlock;
+                                if (valueText != null)
+                                {
+                                    int percentage = (int)(value / 255.0 * 100.0);
+                                    valueText.Text = $"{percentage}%";
+
+                                    // Wyślij powiadomienie (ShowNotification zajmie się uniknięciem spamu)
+                                    ShowNotification(action.Icon, action.Name, $"{percentage}%");
+                                }                            }
                         }
                     }
                 }));
@@ -337,11 +365,34 @@ namespace KOYA_APP
             _tutorialManager?.Start();
         }
 
-        private void UpdateButtonUI(int index, IStreamDeckAction action)        {
+        private void UpdateButtonUI(int index, IStreamDeckAction action)
+        {
             var btn = FindButtonByTag(index.ToString());
             if (btn == null) return;
 
             btn.ToolTip = action.Name;
+
+            // Handle Knob (index 12-13) preview
+            if (index >= 12)
+            {
+                btn.Content = action.Icon;
+                btn.ApplyTemplate();
+                
+                if (btn.Template != null)
+                {
+                    var actionNameText = btn.Template.FindName("actionNameText", btn) as TextBlock;
+                    if (actionNameText != null)
+                    {
+                        actionNameText.Text = action.Name.ToUpper();
+                    }
+                    var valueText = btn.Template.FindName("valueText", btn) as TextBlock;
+                    if (valueText != null && valueText.Text == "--")
+                    {
+                        valueText.Text = "READY"; // Pokazuje, że akcja jest przypisana
+                    }
+                }
+                return;
+            }
 
             if (action is OpenAppAction appAction && !string.IsNullOrEmpty(appAction.Path))
             {

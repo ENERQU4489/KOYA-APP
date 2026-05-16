@@ -1,60 +1,61 @@
 /*
-  KOYA Stream Deck - STRICT MAPPING VERSION
-  Arduino Pro Micro (Atmega32U4)
+  KOYA Stream Deck - Arduino Pro Micro (Atmega32U4)
+  WERSJA: Absolute Potentiometer mapping (0-255)
 */
 
 #include "HID-Project.h"
 
-// MAPOWANIE PINÓW (Fizyczny Pin -> Indeks w aplikacji)
-// Indeksy 0-3: Rząd 1 | 4-7: Rząd 2 | 8-11: Rząd 3
-const int buttonPins[] = {
-  6,  3,  2,  4,   // Rząd 1: Pin 6, 3, 2, 4
-  16, 10, 5,  9,   // Rząd 2: Pin 16, 10, 5, 9
-  15, 14, 8,  2    // Rząd 3: Pin 15, 14, 8, [PIN 2 ZDUBLOWANY]
-}; 
+// KONFIGURACJA PINÓW
+const int buttonPins[] = {6, 3, 2, 4, 16, 10, 5, 7, 15, 14, 8, 9}; 
+const int potPins[] = {A1, A0}; // Górny na A0, Dolny na A1
 
-const int potPins[] = {A0, A1}; // Górna gałka na A0, Dolna na A1
-
-// STAN
+// STAN URZĄDZENIA
 bool lastButtonState[12];
-int lastSentPotValue[2] = {-1, -1};
-const int potJitterThreshold = 3; 
+int lastSentPotValue[2] = {-1, -1}; // Wymuś wysłanie przy starcie
+const int potJitterThreshold = 3; // Ignoruj minimalne wahania ADC (0-1023)
 byte rawhidBuffer[64];
 
 void setup() {
+  // Inicjalizacja przycisków
   for (int i = 0; i < 12; i++) {
     pinMode(buttonPins[i], INPUT_PULLUP);
     lastButtonState[i] = HIGH;
   }
+
   RawHID.begin(rawhidBuffer, sizeof(rawhidBuffer));
 }
 
 void loop() {
-  // 1. PRZYCISKI
+  // 1. OBSŁUGA PRZYCISKÓW (Debounced)
   for (int i = 0; i < 12; i++) {
     bool currentState = digitalRead(buttonPins[i]);
     if (currentState == LOW && lastButtonState[i] == HIGH) {
-      sendReport(1, i, 1); // Wciśnięty
-      delay(20); // Debounce
+      sendKoyaReport(1, i, 1);
+      delay(10); 
     } else if (currentState == HIGH && lastButtonState[i] == LOW) {
-      sendReport(1, i, 0); // Puszczony
+      sendKoyaReport(1, i, 0); // Opcjonalnie: puszczenie przycisku
     }
     lastButtonState[i] = currentState;
   }
 
-  // 2. POTENCJOMETRY (0-255)
+  // 2. OBSŁUGA POTENCJOMETRÓW (Mapowanie Absolutne 0-255)
   for (int i = 0; i < 2; i++) {
     int rawVal = analogRead(potPins[i]);
+    
+    // Jeśli zmiana jest znacząca (filtrowanie szumu/jittera)
     if (abs(rawVal - lastSentPotValue[i]) > potJitterThreshold) {
+      // Mapujemy 0-1023 -> 0-255 (1 bajt dla RawHID)
       byte mappedVal = map(rawVal, 0, 1023, 0, 255);
-      sendReport(2, 12 + i, mappedVal);
+      
+      sendKoyaReport(2, 12 + i, mappedVal);
       lastSentPotValue[i] = rawVal;
     }
   }
-  delay(1);
+
+  delay(5); // Stabilizacja pętli
 }
 
-void sendReport(byte type, byte index, byte val) {
+void sendKoyaReport(byte type, byte index, byte val) {
   memset(rawhidBuffer, 0, sizeof(rawhidBuffer));
   rawhidBuffer[0] = type;
   rawhidBuffer[1] = index;

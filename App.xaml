@@ -93,9 +93,9 @@
             </Style>
 
             <Style x:Key="GlassButtonStyle" TargetType="Button">
-                <Setter Property="Background" Value="#0DFFFFFF"/>
+                <Setter Property="Background" Value="#11FFFFFF"/>
                 <Setter Property="Foreground" Value="White"/>
-                <Setter Property="BorderBrush" Value="#44FFFFFF"/>
+                <Setter Property="BorderBrush" Value="#33FFFFFF"/>
                 <Setter Property="BorderThickness" Value="1"/>
                 <Setter Property="FontFamily" Value="{StaticResource IconFont}"/>
                 <Setter Property="FontSize" Value="24"/>
@@ -112,39 +112,24 @@
                                 </Grid.RenderTransform>
                                 
                                 <!-- Pure White Outer Glow -->
-                                <Border x:Name="glow" CornerRadius="8" Opacity="0" Background="White">
+                                <Border x:Name="glow" CornerRadius="12" Opacity="0" Background="White">
                                     <Border.Effect>
-                                        <DropShadowEffect BlurRadius="15" ShadowDepth="0" Color="White" Opacity="0.5"/>
+                                        <DropShadowEffect BlurRadius="20" ShadowDepth="0" Color="White" Opacity="0.5"/>
                                     </Border.Effect>
                                 </Border>
 
                                 <!-- Pure Achromatic Body -->
-                                <Border x:Name="border" Background="#11FFFFFF" 
-                                        BorderBrush="#33FFFFFF" 
-                                        BorderThickness="1" 
+                                <Border x:Name="border" Background="{TemplateBinding Background}" 
+                                        BorderBrush="{TemplateBinding BorderBrush}" 
+                                        BorderThickness="{TemplateBinding BorderThickness}" 
                                         CornerRadius="12" ClipToBounds="True">
                                     <Grid>
                                         <Border Background="#05FFFFFF" Opacity="0.5"/>
-                                        
-                                        <Rectangle x:Name="sweep" Fill="White" Opacity="0" Width="40" Height="200" HorizontalAlignment="Left" Margin="-100,0,0,0">
-                                            <Rectangle.RenderTransform>
-                                                <RotateTransform Angle="25"/>
-                                            </Rectangle.RenderTransform>
-                                            <Rectangle.Effect>
-                                                <BlurEffect Radius="30"/>
-                                            </Rectangle.Effect>
-                                        </Rectangle>
-
                                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center">
                                             <ContentPresenter.Resources>
                                                 <Style TargetType="TextBlock">
                                                     <Setter Property="FontFamily" Value="{StaticResource IconFont}"/>
                                                     <Setter Property="FontSize" Value="20"/>
-                                                    <Setter Property="Effect">
-                                                        <Setter.Value>
-                                                            <DropShadowEffect BlurRadius="5" ShadowDepth="0" Color="White" Opacity="0.2"/>
-                                                        </Setter.Value>
-                                                    </Setter>
                                                 </Style>
                                             </ContentPresenter.Resources>
                                         </ContentPresenter>
@@ -154,15 +139,14 @@
 
                             <ControlTemplate.Triggers>
                                 <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter Property="Foreground" Value="White"/>
+                                    <Setter Property="Background" Value="#25FFFFFF"/>
+                                    <Setter Property="BorderBrush" Value="White"/>
                                     <Trigger.EnterActions>
                                         <BeginStoryboard>
                                             <Storyboard>
                                                 <DoubleAnimation Storyboard.TargetName="mainScale" Storyboard.TargetProperty="ScaleX" To="1.05" Duration="0:0:0.2"/>
                                                 <DoubleAnimation Storyboard.TargetName="mainScale" Storyboard.TargetProperty="ScaleY" To="1.05" Duration="0:0:0.2"/>
-                                                <DoubleAnimation Storyboard.TargetName="glow" Storyboard.TargetProperty="Opacity" To="0.3" Duration="0:0:0.2"/>
-                                                <ColorAnimation Storyboard.TargetName="border" Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)" To="#25FFFFFF" Duration="0:0:0.2"/>
-                                                <ColorAnimation Storyboard.TargetName="border" Storyboard.TargetProperty="(Border.BorderBrush).(SolidColorBrush.Color)" To="#FFFFFF" Duration="0:0:0.2"/>
+                                                <DoubleAnimation Storyboard.TargetName="glow" Storyboard.TargetProperty="Opacity" To="0.2" Duration="0:0:0.2"/>
                                             </Storyboard>
                                         </BeginStoryboard>
                                     </Trigger.EnterActions>
@@ -172,13 +156,13 @@
                                                 <DoubleAnimation Storyboard.TargetName="mainScale" Storyboard.TargetProperty="ScaleX" To="1" Duration="0:0:0.2"/>
                                                 <DoubleAnimation Storyboard.TargetName="mainScale" Storyboard.TargetProperty="ScaleY" To="1" Duration="0:0:0.2"/>
                                                 <DoubleAnimation Storyboard.TargetName="glow" Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.2"/>
-                                                <ColorAnimation Storyboard.TargetName="border" Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)" To="#11FFFFFF" Duration="0:0:0.2"/>
-                                                <ColorAnimation Storyboard.TargetName="border" Storyboard.TargetProperty="(Border.BorderBrush).(SolidColorBrush.Color)" To="#33FFFFFF" Duration="0:0:0.2"/>
                                             </Storyboard>
                                         </BeginStoryboard>
                                     </Trigger.ExitActions>
                                 </Trigger>
                                 <Trigger Property="IsPressed" Value="True">
+                                    <Setter Property="Background" Value="#66FFFFFF"/>
+                                    <Setter TargetName="glow" Property="Opacity" Value="0.8"/>
                                     <Trigger.EnterActions>
                                         <BeginStoryboard>
                                             <Storyboard>
@@ -187,6 +171,14 @@
                                             </Storyboard>
                                         </BeginStoryboard>
                                     </Trigger.EnterActions>
+                                    <Trigger.ExitActions>
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetName="mainScale" Storyboard.TargetProperty="ScaleX" To="1" Duration="0:0:0.1"/>
+                                                <DoubleAnimation Storyboard.TargetName="mainScale" Storyboard.TargetProperty="ScaleY" To="1" Duration="0:0:0.1"/>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </Trigger.ExitActions>
                                 </Trigger>
                             </ControlTemplate.Triggers>
                         </ControlTemplate>
@@ -195,7 +187,7 @@
             </Style>
 
             <Style x:Key="KnobButtonStyle" TargetType="Button">
-                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="Background" Value="#0DFFFFFF"/>
                 <Setter Property="Foreground" Value="White"/>
                 <Setter Property="BorderThickness" Value="0"/>
                 <Setter Property="Template">
@@ -206,92 +198,61 @@
                                     <ScaleTransform ScaleX="1" ScaleY="1"/>
                                 </Grid.RenderTransform>
 
-                                <!-- Outer Scale / Tick Marks -->
-                                <Ellipse Stroke="#22FFFFFF" StrokeThickness="1" Margin="-10"/>
-                                <Grid x:Name="Ticks" IsHitTestVisible="False" Opacity="0.3">
-                                    <Rectangle Fill="White" Width="1" Height="6" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0,-12,0,0"/>
-                                    <Rectangle Fill="White" Width="1" Height="6" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0,-12,0,0" RenderTransformOrigin="0.5,10.3"><Rectangle.RenderTransform><RotateTransform Angle="45"/></Rectangle.RenderTransform></Rectangle>
-                                    <Rectangle Fill="White" Width="1" Height="6" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0,-12,0,0" RenderTransformOrigin="0.5,10.3"><Rectangle.RenderTransform><RotateTransform Angle="90"/></Rectangle.RenderTransform></Rectangle>
-                                    <Rectangle Fill="White" Width="1" Height="6" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0,-12,0,0" RenderTransformOrigin="0.5,10.3"><Rectangle.RenderTransform><RotateTransform Angle="135"/></Rectangle.RenderTransform></Rectangle>
-                                    <Rectangle Fill="White" Width="1" Height="6" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0,-12,0,0" RenderTransformOrigin="0.5,10.3"><Rectangle.RenderTransform><RotateTransform Angle="180"/></Rectangle.RenderTransform></Rectangle>
-                                    <Rectangle Fill="White" Width="1" Height="6" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0,-12,0,0" RenderTransformOrigin="0.5,10.3"><Rectangle.RenderTransform><RotateTransform Angle="225"/></Rectangle.RenderTransform></Rectangle>
-                                    <Rectangle Fill="White" Width="1" Height="6" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0,-12,0,0" RenderTransformOrigin="0.5,10.3"><Rectangle.RenderTransform><RotateTransform Angle="270"/></Rectangle.RenderTransform></Rectangle>
-                                    <Rectangle Fill="White" Width="1" Height="6" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0,-12,0,0" RenderTransformOrigin="0.5,10.3"><Rectangle.RenderTransform><RotateTransform Angle="315"/></Rectangle.RenderTransform></Rectangle>
-                                </Grid>
-
-                                <!-- Main Dial Body -->
-                                <Border x:Name="dial" CornerRadius="100" BorderThickness="1.5" BorderBrush="#33FFFFFF">
-                                    <Border.Background>
-                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                                            <GradientStop Color="#222222" Offset="0"/>
-                                            <GradientStop Color="#050505" Offset="0.5"/>
-                                            <GradientStop Color="#151515" Offset="1"/>
-                                        </LinearGradientBrush>
-                                    </Border.Background>
+                                <!-- Glow Effect -->
+                                <Border x:Name="glow" CornerRadius="100" Opacity="0" Background="White">
                                     <Border.Effect>
-                                        <DropShadowEffect x:Name="dialShadow" BlurRadius="15" ShadowDepth="4" Color="Black" Opacity="0.5"/>
+                                        <DropShadowEffect BlurRadius="25" Color="White" Opacity="0.4" ShadowDepth="0"/>
                                     </Border.Effect>
-                                    
-                                    <Grid>
-                                        <!-- Inner Bezel -->
-                                        <Ellipse Stroke="#11FFFFFF" StrokeThickness="4" Margin="2"/>
-                                        
-                                        <!-- Pointer Indicator -->
-                                        <Grid x:Name="pointer" RenderTransformOrigin="0.5,0.5">
-                                            <Grid.RenderTransform>
-                                                <RotateTransform Angle="0"/>
-                                            </Grid.RenderTransform>
-                                            <Border Width="3" Height="15" Background="White" VerticalAlignment="Top" Margin="0,8,0,0" CornerRadius="1.5">
-                                                <Border.Effect>
-                                                    <DropShadowEffect x:Name="pointerGlow" BlurRadius="10" Color="White" Opacity="0" ShadowDepth="0"/>
-                                                </Border.Effect>
-                                            </Border>
-                                        </Grid>
+                                </Border>
 
-                                        <!-- Center Content (Icon) -->
-                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center">
-                                            <ContentPresenter.Resources>
-                                                <Style TargetType="TextBlock">
-                                                    <Setter Property="FontSize" Value="24"/>
-                                                    <Setter Property="Opacity" Value="0.6"/>
-                                                </Style>
-                                            </ContentPresenter.Resources>
-                                        </ContentPresenter>
+                                <!-- Flat Circular Body -->
+                                <Border x:Name="itemBorder" Background="{TemplateBinding Background}" BorderThickness="1.5" BorderBrush="#33FFFFFF" CornerRadius="100">
+                                    <Grid>
+                                        <Grid x:Name="pointer" RenderTransformOrigin="0.5,0.5">
+                                            <Grid.RenderTransform><RotateTransform Angle="0"/></Grid.RenderTransform>
+                                            <Border Width="2" Height="14" Background="White" VerticalAlignment="Top" Margin="0,8,0,0" CornerRadius="1" Opacity="0.6"/>
+                                        </Grid>
+                                        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                                            <TextBlock x:Name="valueText" Text="--" Foreground="White" FontSize="10" FontWeight="Bold" HorizontalAlignment="Center" Opacity="0.5" Margin="0,0,0,2"/>
+                                            <ContentPresenter x:Name="contentPresenter" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                <ContentPresenter.Resources>
+                                                    <Style TargetType="TextBlock"><Setter Property="FontSize" Value="28"/><Setter Property="Foreground" Value="White"/><Setter Property="Opacity" Value="0.9"/></Style>
+                                                </ContentPresenter.Resources>
+                                            </ContentPresenter>
+                                            <TextBlock x:Name="actionNameText" Text="" Foreground="White" FontSize="7" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0,3,0,0" Opacity="0.4" MaxWidth="70" TextAlignment="Center"/>
+                                        </StackPanel>
                                     </Grid>
                                 </Border>
                             </Grid>
 
                             <ControlTemplate.Triggers>
                                 <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#22FFFFFF"/>
+                                    <Setter TargetName="itemBorder" Property="BorderBrush" Value="#66FFFFFF"/>
                                     <Trigger.EnterActions>
                                         <BeginStoryboard>
                                             <Storyboard>
-                                                <DoubleAnimation Storyboard.TargetName="knobRoot" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)" To="1.05" Duration="0:0:0.3"/>
-                                                <DoubleAnimation Storyboard.TargetName="knobRoot" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)" To="1.05" Duration="0:0:0.3"/>
-                                                <DoubleAnimation Storyboard.TargetName="pointerGlow" Storyboard.TargetProperty="Opacity" To="0.8" Duration="0:0:0.3"/>
-                                                <DoubleAnimation Storyboard.TargetName="Ticks" Storyboard.TargetProperty="Opacity" To="0.7" Duration="0:0:0.3"/>
-                                                <DoubleAnimation Storyboard.TargetName="dialShadow" Storyboard.TargetProperty="BlurRadius" To="25" Duration="0:0:0.3"/>
+                                                <DoubleAnimation Storyboard.TargetName="knobRoot" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)" To="1.05" Duration="0:0:0.2"/>
+                                                <DoubleAnimation Storyboard.TargetName="knobRoot" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)" To="1.05" Duration="0:0:0.2"/>
+                                                <DoubleAnimation Storyboard.TargetName="glow" Storyboard.TargetProperty="Opacity" To="0.2" Duration="0:0:0.2"/>
                                             </Storyboard>
                                         </BeginStoryboard>
                                     </Trigger.EnterActions>
                                     <Trigger.ExitActions>
                                         <BeginStoryboard>
                                             <Storyboard>
-                                                <DoubleAnimation Storyboard.TargetName="knobRoot" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)" To="1" Duration="0:0:0.3"/>
-                                                <DoubleAnimation Storyboard.TargetName="knobRoot" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)" To="1" Duration="0:0:0.3"/>
-                                                <DoubleAnimation Storyboard.TargetName="pointerGlow" Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.3"/>
-                                                <DoubleAnimation Storyboard.TargetName="Ticks" Storyboard.TargetProperty="Opacity" To="0.3" Duration="0:0:0.3"/>
-                                                <DoubleAnimation Storyboard.TargetName="dialShadow" Storyboard.TargetProperty="BlurRadius" To="15" Duration="0:0:0.3"/>
+                                                <DoubleAnimation Storyboard.TargetName="knobRoot" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)" To="1" Duration="0:0:0.2"/>
+                                                <DoubleAnimation Storyboard.TargetName="knobRoot" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)" To="1" Duration="0:0:0.2"/>
+                                                <DoubleAnimation Storyboard.TargetName="glow" Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.2"/>
                                             </Storyboard>
                                         </BeginStoryboard>
                                     </Trigger.ExitActions>
                                 </Trigger>
                                 <Trigger Property="IsPressed" Value="True">
-                                    <Setter TargetName="dial" Property="Background" Value="#000000"/>
+                                    <Setter Property="Background" Value="#66FFFFFF"/>
+                                    <Setter TargetName="glow" Property="Opacity" Value="0.6"/>
                                     <Setter TargetName="knobRoot" Property="RenderTransform">
-                                        <Setter.Value>
-                                            <ScaleTransform ScaleX="0.95" ScaleY="0.95"/>
-                                        </Setter.Value>
+                                        <Setter.Value><ScaleTransform ScaleX="0.96" ScaleY="0.94"/></Setter.Value>
                                     </Setter>
                                 </Trigger>
                             </ControlTemplate.Triggers>

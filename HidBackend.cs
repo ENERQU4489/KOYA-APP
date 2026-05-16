@@ -39,6 +39,8 @@ namespace KOYA_APP
             _stream = null;
         }
 
+        private bool _firstConnectAttempt = true;
+
         private void MonitorDevice()
         {
             while (_isRunning)
@@ -46,29 +48,44 @@ namespace KOYA_APP
                 if (_stream == null)
                 {
                     TryConnect();
-                    if (_stream == null) { Thread.Sleep(2000); continue; }
+                    if (_stream == null) 
+                    { 
+                        if (_firstConnectAttempt)
+                        {
+                            _firstConnectAttempt = false;
+                            ConnectionStatusChanged?.Invoke(false);
+                        }
+                        Thread.Sleep(2000); 
+                        continue; 
+                    }
                 }
 
                 try
                 {
-                    byte[] buffer = new byte[64];
+                    int reportSize = _device?.MaxInputReportLength ?? 64;
+                    byte[] buffer = new byte[reportSize];
                     int count = _stream.Read(buffer, 0, buffer.Length);
                     if (count > 0) ParseInput(buffer);
                 }
                 catch { Disconnect(); Thread.Sleep(100); }
-                Thread.Sleep(1);
             }
         }
 
         private void TryConnect()
         {
             var devices = DeviceList.Local.GetHidDevices(VendorId, ProductId).ToList();
-            var targetDevice = devices.FirstOrDefault(d => d.MaxInputReportLength == 64);
+            
+            // Próbujemy znaleźć interfejs RawHID (zazwyczaj 64 lub 65 bajtów)
+            var targetDevice = devices.FirstOrDefault(d => d.MaxInputReportLength >= 63 && d.MaxInputReportLength <= 65);
+            
+            // Jeśli nie ma idealnego dopasowania, bierzemy pierwszy lepszy z tej listy
+            if (targetDevice == null) targetDevice = devices.FirstOrDefault();
 
             if (targetDevice != null && targetDevice.TryOpen(out _stream))
             {
                 _device = targetDevice;
                 _stream.ReadTimeout = 1000;
+                _firstConnectAttempt = false;
                 ConnectionStatusChanged?.Invoke(true);
             }
         }
@@ -81,8 +98,6 @@ namespace KOYA_APP
             ConnectionStatusChanged?.Invoke(false);
         }
 
-        private bool[] _lastButtonStates = new bool[14];
-
         private void ParseInput(byte[] data)
         {
             int offset = (data[0] == 0) ? 1 : 0;
@@ -92,11 +107,9 @@ namespace KOYA_APP
 
             if (index < 0 || index >= 14) return;
 
-            if (type == 1) // Button
+            if (type == 1 && val == 1) // Button Pressed
             {
-                bool isPressed = (val == 1);
-                if (isPressed && !_lastButtonStates[index]) ButtonPressed?.Invoke(index);
-                _lastButtonStates[index] = isPressed;
+                ButtonPressed?.Invoke(index);
             }
             else if (type == 2) // Absolute Pot
             {

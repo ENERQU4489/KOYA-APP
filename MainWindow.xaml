@@ -142,9 +142,9 @@
 
                     <!-- Knob Sidebar -->
                     <Border Grid.Column="1" Background="#0AFFFFFF" CornerRadius="20" BorderThickness="1" BorderBrush="#15FFFFFF" Padding="25">
-                        <StackPanel VerticalAlignment="Center">
+                        <StackPanel Grid.Row="1" VerticalAlignment="Center">
                             <Button Style="{StaticResource KnobButtonStyle}" Tag="12" Click="OnDeckButtonClick" MouseRightButtonUp="OnDeckButtonRightClick" 
-                                    Content="&#xE995;" Width="120" Height="120" MouseWheel="OnKnobMouseWheel" Margin="0,0,0,40"/>
+                                    Content="&#xE995;" Width="120" Height="120" MouseWheel="OnKnobMouseWheel" Margin="0,0,0,80"/>
                             <Button Style="{StaticResource KnobButtonStyle}" Tag="13" Click="OnDeckButtonClick" MouseRightButtonUp="OnDeckButtonRightClick" 
                                     Content="&#xE995;" Width="120" Height="120" MouseWheel="OnKnobMouseWheel"/>
                         </StackPanel>

@@ -29,5 +29,17 @@ namespace KOYA_APP
             };
             _closeTimer.Start();
         }
+
+        public void UpdateContent(string description)
+        {
+            ActionDesc.Text = description;
+            
+            // Reset timer
+            _closeTimer.Stop();
+            _closeTimer.Start();
+
+            // Restart animation if possible, but at least stay visible
+            MainGrid.Opacity = 1; 
+        }
     }
 }

@@ -14,6 +14,12 @@ namespace KOYA_APP
             // Logika ustawienia na sztywno
         }
 
+        public void ExecuteAnalog(bool direction)
+        {
+            if (direction) Value = Math.Min(100, Value + 10);
+            else Value = Math.Max(0, Value - 10);
+        }
+
         public void ExecuteAbsolute(int value)
         {
             Value = (int)(value * 100.0 / 255.0);

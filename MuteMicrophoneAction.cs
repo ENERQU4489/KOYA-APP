@@ -34,8 +34,19 @@ namespace KOYA_APP
                 float step = 0.05f; 
                 float cur = d.AudioEndpointVolume.MasterVolumeLevelScalar; 
                 d.AudioEndpointVolume.MasterVolumeLevelScalar = direction ? System.Math.Min(1f, cur + step) : System.Math.Max(0f, cur - step); 
-            }
-        public void ExecuteAbsolute(int value) { } catch {} 
+            } catch {}
+        }
+
+        public void ExecuteAbsolute(int value) 
+        { 
+            try 
+            { 
+                var en = new MMDeviceEnumerator(); 
+                var d = string.IsNullOrEmpty(DeviceId) 
+                    ? en.GetDefaultAudioEndpoint(DataFlow.Capture, Role.Communications) 
+                    : en.GetDevice(DeviceId);
+                d.AudioEndpointVolume.MasterVolumeLevelScalar = value / 255f;
+            } catch {}
         }
     }
 }

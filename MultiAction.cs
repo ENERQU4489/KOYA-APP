@@ -29,7 +29,14 @@ namespace KOYA_APP
             {
                 action.ExecuteAnalog(direction);
             }
-        public void ExecuteAbsolute(int value) { }
+        }
+
+        public void ExecuteAbsolute(int value) 
+        { 
+            foreach (var action in Actions)
+            {
+                action.ExecuteAbsolute(value);
+            }
         }
     }
 }

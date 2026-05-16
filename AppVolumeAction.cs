@@ -1,5 +1,6 @@
 using NAudio.CoreAudioApi;
 using System.Diagnostics;
+using System;
 
 namespace KOYA_APP
 {
@@ -32,7 +33,15 @@ namespace KOYA_APP
                 float next = direction ? current + step : current - step;
                 session.SimpleAudioVolume.Volume = Math.Clamp(next, 0f, 1f);
             }
-        public void ExecuteAbsolute(int value) { }
+        }
+
+        public void ExecuteAbsolute(int value) 
+        { 
+            var session = GetSession();
+            if (session != null)
+            {
+                session.SimpleAudioVolume.Volume = value / 255f;
+            }
         }
 
         private AudioSessionControl? GetSession()
