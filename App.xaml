@@ -94,7 +94,7 @@
 
             <Style x:Key="GlassButtonStyle" TargetType="Button">
                 <Setter Property="Background" Value="#0DFFFFFF"/>
-                <Setter Property="Foreground" Value="#AAFFFFFF"/>
+                <Setter Property="Foreground" Value="White"/>
                 <Setter Property="BorderBrush" Value="#44FFFFFF"/>
                 <Setter Property="BorderThickness" Value="1"/>
                 <Setter Property="FontFamily" Value="{StaticResource IconFont}"/>
@@ -196,7 +196,7 @@
 
             <Style x:Key="KnobButtonStyle" TargetType="Button">
                 <Setter Property="Background" Value="#0AFFFFFF"/>
-                <Setter Property="Foreground" Value="#77FFFFFF"/>
+                <Setter Property="Foreground" Value="White"/>
                 <Setter Property="BorderBrush" Value="#44FFFFFF"/>
                 <Setter Property="BorderThickness" Value="2"/>
                 <Setter Property="FontFamily" Value="{StaticResource IconFont}"/>

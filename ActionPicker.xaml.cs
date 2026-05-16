@@ -122,10 +122,9 @@ namespace KOYA_APP
         {
             var selected = ActionsListBox.SelectedItem as IStreamDeckAction;
             ExtraSettingsPanel.Visibility = Visibility.Collapsed;
-            DevicesComboBox.Visibility = Visibility.Collapsed;
-            ShortcutTextBox.Visibility = Visibility.Collapsed;
+            DeviceSettingsGroup.Visibility = Visibility.Collapsed;
+            ShortcutSettingsGroup.Visibility = Visibility.Collapsed;
             PasteTextPanel.Visibility = Visibility.Collapsed;
-            BrowseFileButton.Visibility = Visibility.Collapsed;
             ValueSliderPanel.Visibility = Visibility.Collapsed;
             MacroPanel.Visibility = Visibility.Collapsed;
 
@@ -134,8 +133,8 @@ namespace KOYA_APP
             if (selected is SelectMicAction || selected is MuteMicrophoneAction)
             {
                 ExtraSettingsPanel.Visibility = Visibility.Visible;
-                DevicesComboBox.Visibility = Visibility.Visible;
-                ExtraSettingsTitle.Text = "Wybierz urzadzenie (Mikrofon):";
+                DeviceSettingsGroup.Visibility = Visibility.Visible;
+                ExtraSettingsTitle.Text = "URZĄDZENIA AUDIO";
                 
                 try
                 {
@@ -150,106 +149,80 @@ namespace KOYA_APP
                     }
                     else
                     {
-                        ExtraSettingsTitle.Text = "BRAK URZADZEN AUDIO!";
                         DevicesComboBox.IsEnabled = false;
                     }
                 }
-                catch (System.Exception ex)
+                catch (System.Exception)
                 {
-                    ExtraSettingsTitle.Text = "BLAD AUDIO: " + ex.Message;
                     DevicesComboBox.IsEnabled = false;
-                }
-            }
-            else if (selected is BrightnessAction)
-            {
-                ExtraSettingsPanel.Visibility = Visibility.Visible;
-                DevicesComboBox.Visibility = Visibility.Visible;
-                ExtraSettingsTitle.Text = "Wybierz ekran do sterowania:";
-
-                try
-                {
-                    var monitors = new List<KeyValuePair<string, string>>();
-                    using (var searcher = new System.Management.ManagementObjectSearcher(@"root\wmi", "SELECT * FROM WmiMonitorID"))
-                    {
-                        foreach (System.Management.ManagementObject obj in searcher.Get())
-                        {
-                            var nameBytes = obj["UserFriendlyName"] as ushort[];
-                            var name = nameBytes != null ? new string(nameBytes.Select(b => (char)b).ToArray()).TrimEnd('\0') : "Monitor";
-                            var instanceName = obj["InstanceName"]?.ToString() ?? "Unknown";
-                            monitors.Add(new KeyValuePair<string, string>(instanceName, name));
-                        }
-                    }
-
-                    if (monitors.Count == 0)
-                    {
-                        monitors.Add(new KeyValuePair<string, string>("", "Domyślny Monitor"));
-                    }
-
-                    DevicesComboBox.DisplayMemberPath = "Value";
-                    DevicesComboBox.ItemsSource = monitors;
-                    DevicesComboBox.SelectedIndex = 0;
-                    DevicesComboBox.IsEnabled = true;
-                }
-                catch (System.Exception ex)
-                {
-                    ExtraSettingsTitle.Text = "BLAD WMI: " + ex.Message;
                 }
             }
             else if (selected is AppVolumeAction)
             {
                 ExtraSettingsPanel.Visibility = Visibility.Visible;
-                DevicesComboBox.Visibility = Visibility.Visible;
-                ExtraSettingsTitle.Text = "Wybierz aplikacje:";
-
+                DeviceSettingsGroup.Visibility = Visibility.Visible;
+                ExtraSettingsTitle.Text = "MIKSER GŁOŚNOŚCI";
+                
                 try
                 {
                     var enumerator = new MMDeviceEnumerator();
                     var device = enumerator.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia);
                     var sessionManager = device.AudioSessionManager;
-                    sessionManager.RefreshSessions();
-
                     var apps = new List<dynamic>();
                     for (int i = 0; i < sessionManager.Sessions.Count; i++)
                     {
                         var session = sessionManager.Sessions[i];
                         uint pid = session.GetProcessID;
                         if (pid == 0) continue;
-
-                        string name;
-                        try { name = Process.GetProcessById((int)pid).ProcessName; }
-                        catch { name = session.DisplayName; }
-
-                        if (string.IsNullOrEmpty(name)) name = "Unknown App";
-                        apps.Add(new { Name = name, Id = (int)pid });
+                        var process = System.Diagnostics.Process.GetProcessById((int)pid);
+                        apps.Add(new { Id = (int)pid, Name = process.ProcessName });
                     }
-
                     DevicesComboBox.DisplayMemberPath = "Name";
                     DevicesComboBox.ItemsSource = apps;
-                    if (apps.Count > 0)
+                    if (apps.Count > 0) DevicesComboBox.SelectedIndex = 0;
+                }
+                catch (System.Exception) { }
+            }
+            else if (selected is BrightnessAction)
+            {
+                ExtraSettingsPanel.Visibility = Visibility.Visible;
+                DeviceSettingsGroup.Visibility = Visibility.Visible;
+                ExtraSettingsTitle.Text = "KONTROLA EKRANU";
+                
+                var monitors = new List<KeyValuePair<string, string>>();
+                try {
+                    using (var searcher = new System.Management.ManagementObjectSearcher(@"root\wmi", "SELECT * FROM WmiMonitorID"))
                     {
-                        DevicesComboBox.SelectedIndex = 0;
-                        DevicesComboBox.IsEnabled = true;
+                        foreach (System.Management.ManagementObject obj in searcher.Get())
+                        {
+                            string id = obj["InstanceName"].ToString() ?? "";
+                            monitors.Add(new KeyValuePair<string, string>(id, "Monitor " + (monitors.Count + 1)));
+                        }
                     }
-                }
-                catch (System.Exception ex)
-                {
-                    ExtraSettingsTitle.Text = "BLAD MIXERA: " + ex.Message;
-                }
+                } catch { }
+
+                if (monitors.Count == 0) monitors.Add(new KeyValuePair<string, string>("", "Domyślny Monitor"));
+                
+                DevicesComboBox.DisplayMemberPath = "Value";
+                DevicesComboBox.ItemsSource = monitors;
+                DevicesComboBox.SelectedIndex = 0;
             }
             else if (selected is CustomShortcutAction)
             {
                 ExtraSettingsPanel.Visibility = Visibility.Visible;
-                ShortcutTextBox.Visibility = Visibility.Visible;
-                ExtraSettingsTitle.Text = "Wcisnij kombinacje klawiszy:";
+                ShortcutSettingsGroup.Visibility = Visibility.Visible;
+                ExtraSettingsTitle.Text = "SKRÓT KLAWIATUROWY";
                 _capturedKeys.Clear();
-                ShortcutTextBox.Text = "Kliknij tutaj i wcisnij klawisze...";
+                ShortcutTextBox.Text = "KLIKNIJ I NACIŚNIJ KLAWISZE";
+                ShortcutTextBox.Focus();
             }
             else if (selected is PasteTextAction pt)
             {
                 ExtraSettingsPanel.Visibility = Visibility.Visible;
                 PasteTextPanel.Visibility = Visibility.Visible;
                 BrowseFileButton.Visibility = Visibility.Collapsed;
-                ExtraSettingsTitle.Text = "Wpisz tekst do wklejenia:";
+                ExtraSettingsTitle.Text = "WKLEJANIE TEKSTU";
+                InputLabel.Text = "TEKST DO WKLEJENIA";
                 PasteTextInput.Text = pt.TextToPaste;
                 PasteTextInput.Focus();
             }
@@ -258,7 +231,8 @@ namespace KOYA_APP
                 ExtraSettingsPanel.Visibility = Visibility.Visible;
                 PasteTextPanel.Visibility = Visibility.Visible;
                 BrowseFileButton.Visibility = Visibility.Visible;
-                ExtraSettingsTitle.Text = "Wybierz aplikację (.exe) lub wpisz ścieżkę:";
+                ExtraSettingsTitle.Text = "OTWIERANIE APLIKACJI";
+                InputLabel.Text = "ŚCIEŻKA DO PLIKU .EXE";
                 PasteTextInput.Text = appAction.Path;
                 PasteTextInput.Focus();
             }
@@ -267,7 +241,8 @@ namespace KOYA_APP
                 ExtraSettingsPanel.Visibility = Visibility.Visible;
                 PasteTextPanel.Visibility = Visibility.Visible;
                 BrowseFileButton.Visibility = Visibility.Collapsed;
-                ExtraSettingsTitle.Text = "Wpisz adres URL (np. https://google.com):";
+                ExtraSettingsTitle.Text = "OTWIERANIE ADRESU URL";
+                InputLabel.Text = "ADRES INTERNETOWY";
                 PasteTextInput.Text = ol.Url;
                 PasteTextInput.Focus();
             }
@@ -276,7 +251,8 @@ namespace KOYA_APP
                 ExtraSettingsPanel.Visibility = Visibility.Visible;
                 PasteTextPanel.Visibility = Visibility.Visible;
                 BrowseFileButton.Visibility = Visibility.Visible;
-                ExtraSettingsTitle.Text = "Wpisz ścieżkę folderu lub wybierz ikonę folderu:";
+                ExtraSettingsTitle.Text = "TWORZENIE FOLDERU";
+                InputLabel.Text = "ŚCIEŻKA DOCELOWA";
                 PasteTextInput.Text = cf.FolderPath;
                 PasteTextInput.Focus();
             }
@@ -285,7 +261,8 @@ namespace KOYA_APP
                 ExtraSettingsPanel.Visibility = Visibility.Visible;
                 PasteTextPanel.Visibility = Visibility.Visible;
                 BrowseFileButton.Visibility = Visibility.Visible;
-                ExtraSettingsTitle.Text = "Wpisz komende lub sciezke do skryptu (.ps1):";
+                ExtraSettingsTitle.Text = "SKRYPT POWERSHELL";
+                InputLabel.Text = "KOMENDA LUB ŚCIEŻKA .PS1";
                 PasteTextInput.Text = ps.ScriptContent;
                 PasteTextInput.Focus();
             }
@@ -293,9 +270,9 @@ namespace KOYA_APP
             {
                 ExtraSettingsPanel.Visibility = Visibility.Visible;
                 MacroPanel.Visibility = Visibility.Visible;
-                ExtraSettingsTitle.Text = "Nagraj sekwencję (Klawiatura + Mysz):";
+                ExtraSettingsTitle.Text = "REJESTRATOR MAKRA";
                 _macroSteps.Clear();
-                MacroStatusText.Text = "GOTOWY DO NAGRYWANIA";
+                MacroStatusText.Text = "GOTOWY DO ZAPISU";
             }
             else if (selected is FanSpeedAction fs)
             {
@@ -303,7 +280,8 @@ namespace KOYA_APP
                 ValueSliderPanel.Visibility = Visibility.Visible;
                 ValueSlider.Maximum = 100;
                 ValueSlider.Value = fs.Value;
-                ExtraSettingsTitle.Text = "Wybierz stałą prędkość wentylatora (%):";
+                ExtraSettingsTitle.Text = "WENTYLATORY";
+                SliderLabel.Text = "PRĘDKOŚĆ OBROTOWA (%)";
             }
             else if (selected is RgbColorAction rc)
             {
@@ -311,7 +289,8 @@ namespace KOYA_APP
                 ValueSliderPanel.Visibility = Visibility.Visible;
                 ValueSlider.Maximum = 360;
                 ValueSlider.Value = rc.Value;
-                ExtraSettingsTitle.Text = "Wybierz stały odcień RGB (HUE):";
+                ExtraSettingsTitle.Text = "PODŚWIETLENIE RGB";
+                SliderLabel.Text = "ODCIEŃ KOLORU (HUE)";
             }
             else if (selected is RgbLightAction rl)
             {
@@ -319,14 +298,16 @@ namespace KOYA_APP
                 ValueSliderPanel.Visibility = Visibility.Visible;
                 ValueSlider.Maximum = 100;
                 ValueSlider.Value = rl.Value;
-                ExtraSettingsTitle.Text = "Wybierz stałą jasność RGB (%):";
+                ExtraSettingsTitle.Text = "JASNOŚĆ LED";
+                SliderLabel.Text = "INTENSYWNOŚĆ (%)";
             }
             else if (selected is SoundboardAction sb)
             {
                 ExtraSettingsPanel.Visibility = Visibility.Visible;
                 PasteTextPanel.Visibility = Visibility.Visible;
                 BrowseFileButton.Visibility = Visibility.Visible;
-                ExtraSettingsTitle.Text = "Wybierz plik dźwiękowy (MP3/WAV) lub wpisz ścieżkę:";
+                ExtraSettingsTitle.Text = "SOUNDBOARD";
+                InputLabel.Text = "PLIK DŹWIĘKOWY (MP3/WAV)";
                 PasteTextInput.Text = sb.FilePath;
                 PasteTextInput.Focus();
             }
