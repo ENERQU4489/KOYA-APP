@@ -196,6 +196,8 @@ namespace KOYA_APP
         private DateTime _lastConnectionTime = DateTime.MinValue;
         private bool IsHardwareStable => (DateTime.Now - _lastConnectionTime).TotalSeconds > 2;
 
+        private Dictionary<int, DateTime> _lastKnobUpdateTime = new Dictionary<int, DateTime>();
+
         private void SetupHid()
         {
             _hidBackend.ButtonPressed += (index) =>
@@ -205,25 +207,25 @@ namespace KOYA_APP
                     if (index >= 0 && index < _buttonActions.Length)
                     {
                         var action = _buttonActions[index];
-                        
+
                         if (action != null)
                         {
                             action.Execute();
                             PlayClickSound();
                             ShowNotification(action.Icon, action.Name, "Akcja wykonana");
                         }
-                        
+
                         if (_buttonCache.TryGetValue(index.ToString(), out var btn))
                         {
                             var originalBackground = btn.Background;
                             var highlightBrush = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(120, 255, 255, 255));
                             btn.Background = highlightBrush;
-                            
+
                             var anim = new System.Windows.Media.Animation.ColorAnimation(
                                 System.Windows.Media.Colors.Transparent, 
                                 System.TimeSpan.FromMilliseconds(200));
                             btn.Background.BeginAnimation(System.Windows.Media.SolidColorBrush.ColorProperty, anim);
-                            
+
                             await System.Threading.Tasks.Task.Delay(200);
                             btn.Background = originalBackground;
                         }
@@ -233,7 +235,11 @@ namespace KOYA_APP
 
             _hidBackend.KnobAbsoluteChanged += (index, value) =>
             {
-                if (!IsHardwareStable) return;
+                // Throttling: 30ms (ok. 33 FPS) dla płynnego UI bez lagowania
+                if (_lastKnobUpdateTime.TryGetValue(index, out var lastTime) && (DateTime.Now - lastTime).TotalMilliseconds < 30)
+                    return;
+
+                _lastKnobUpdateTime[index] = DateTime.Now;
 
                 System.Windows.Application.Current.Dispatcher.BeginInvoke(new Action(() =>
                 {
@@ -245,34 +251,22 @@ namespace KOYA_APP
                             action.ExecuteAbsolute(value);
                         }
                         
-                        // Update UI Knob rotation and Text
-                        if (_buttonCache.TryGetValue(index.ToString(), out var btn))
+                        // Update UI Knob rotation and Text using high-performance cache
+                        if (_knobPointerCache.TryGetValue(index, out var ptr))
                         {
-                            btn.ApplyTemplate();
-                            if (btn.Template != null)
-                            {
-                                // 1. Update Pointer Rotation
-                                var transform = btn.Template.FindName("pointer", btn) as FrameworkElement;
-                                if (transform != null)
-                                {
-                                    double angle = (value / 255.0) * 300.0 - 150.0;
-                                    transform.RenderTransform = new System.Windows.Media.RotateTransform(angle);
-                                }
+                            double angle = (value / 255.0) * 300.0 - 150.0;
+                            ptr.RenderTransform = new System.Windows.Media.RotateTransform(angle);
+                        }
 
-                                // 2. Update Percentage Text
-                                var valueText = btn.Template.FindName("valueText", btn) as TextBlock;
-                                if (valueText != null)
-                                {
-                                    int percentage = (int)(value / 255.0 * 100.0);
-                                    valueText.Text = $"{percentage}%";
-
-                                    // Wyślij powiadomienie (ShowNotification zajmie się uniknięciem spamu)
-                                    ShowNotification(action.Icon, action.Name, $"{percentage}%");
-                                }                            }
+                        if (_knobValueTextCache.TryGetValue(index, out var valTxt))
+                        {
+                            int percentage = (int)Math.Round(value / 255.0 * 100.0);
+                            valTxt.Text = $"{percentage}%";
                         }
                     }
                 }));
             };
+
 
             _hidBackend.KnobTurned += (index, direction) =>
             {
@@ -365,6 +359,9 @@ namespace KOYA_APP
             _tutorialManager?.Start();
         }
 
+        private Dictionary<int, FrameworkElement> _knobPointerCache = new Dictionary<int, FrameworkElement>();
+        private Dictionary<int, TextBlock> _knobValueTextCache = new Dictionary<int, TextBlock>();
+
         private void UpdateButtonUI(int index, IStreamDeckAction action)
         {
             var btn = FindButtonByTag(index.ToString());
@@ -385,10 +382,16 @@ namespace KOYA_APP
                     {
                         actionNameText.Text = action.Name.ToUpper();
                     }
-                    var valueText = btn.Template.FindName("valueText", btn) as TextBlock;
-                    if (valueText != null && valueText.Text == "--")
+
+                    // Cache template parts for high-performance updates
+                    var ptr = btn.Template.FindName("pointer", btn) as FrameworkElement;
+                    if (ptr != null) _knobPointerCache[index] = ptr;
+
+                    var valTxt = btn.Template.FindName("valueText", btn) as TextBlock;
+                    if (valTxt != null) 
                     {
-                        valueText.Text = "READY"; // Pokazuje, że akcja jest przypisana
+                        _knobValueTextCache[index] = valTxt;
+                        if (valTxt.Text == "--") valTxt.Text = "READY";
                     }
                 }
                 return;

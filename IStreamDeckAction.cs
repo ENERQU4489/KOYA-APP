@@ -38,6 +38,7 @@ namespace KOYA_APP
     [JsonDerivedType(typeof(FanSpeedAction), typeDiscriminator: "FanSpeed")]
     [JsonDerivedType(typeof(RgbColorAction), typeDiscriminator: "RgbColor")]
     [JsonDerivedType(typeof(RgbLightAction), typeDiscriminator: "RgbLight")]
+    [JsonDerivedType(typeof(VirtualMicAction), typeDiscriminator: "VirtualMic")]
     public interface IStreamDeckAction
     {
         string Name { get; }

@@ -130,6 +130,8 @@ namespace KOYA_APP
             PasteTextPanel.Visibility = Visibility.Collapsed;
             ValueSliderPanel.Visibility = Visibility.Collapsed;
             MacroPanel.Visibility = Visibility.Collapsed;
+            OutputDeviceLabel.Visibility = Visibility.Collapsed;
+            OutputDevicesComboBox.Visibility = Visibility.Collapsed;
 
             if (selected == null) return;
 
@@ -138,7 +140,8 @@ namespace KOYA_APP
                 ExtraSettingsPanel.Visibility = Visibility.Visible;
                 DeviceSettingsGroup.Visibility = Visibility.Visible;
                 ExtraSettingsTitle.Text = "URZĄDZENIA AUDIO";
-                
+                InputDeviceLabel.Text = "WYBIERZ URZĄDZENIE (WEJŚCIE)";
+
                 try
                 {
                     var enumerator = new MMDeviceEnumerator();
@@ -150,16 +153,36 @@ namespace KOYA_APP
                         DevicesComboBox.SelectedIndex = 0;
                         DevicesComboBox.IsEnabled = true;
                     }
-                    else
-                    {
-                        DevicesComboBox.IsEnabled = false;
-                    }
                 }
-                catch (System.Exception)
-                {
-                    DevicesComboBox.IsEnabled = false;
-                }
+                catch { DevicesComboBox.IsEnabled = false; }
             }
+            else if (selected is VirtualMicAction vm)
+            {
+                ExtraSettingsPanel.Visibility = Visibility.Visible;
+                DeviceSettingsGroup.Visibility = Visibility.Visible;
+                ExtraSettingsTitle.Text = "VIRTUAL MIC LINK";
+                InputDeviceLabel.Text = "1. TWÓJ MIKROFON (WEJŚCIE)";
+                OutputDeviceLabel.Text = "2. CABLE INPUT (WYJŚCIE)";
+                OutputDeviceLabel.Visibility = Visibility.Visible;
+                OutputDevicesComboBox.Visibility = Visibility.Visible;
+
+                try
+                {
+                    var enumerator = new MMDeviceEnumerator();
+                    var inputs = enumerator.EnumerateAudioEndPoints(DataFlow.Capture, DeviceState.Active).ToList();
+                    DevicesComboBox.DisplayMemberPath = "FriendlyName";
+                    DevicesComboBox.ItemsSource = inputs;
+
+                    var outputs = enumerator.EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active).ToList();
+                    OutputDevicesComboBox.DisplayMemberPath = "FriendlyName";
+                    OutputDevicesComboBox.ItemsSource = outputs;
+
+                    if (inputs.Count > 0) DevicesComboBox.SelectedIndex = 0;
+                    if (outputs.Count > 0) OutputDevicesComboBox.SelectedIndex = 0;
+                }
+                catch { }
+            }
+
             else if (selected is AppVolumeAction)
             {
                 ExtraSettingsPanel.Visibility = Visibility.Visible;

@@ -218,10 +218,12 @@
                             <Grid>
                                 <!-- 1. Device Selection (Audio/Monitor) -->
                                 <StackPanel x:Name="DeviceSettingsGroup" Visibility="Collapsed">
-                                    <TextBlock Text="WYBIERZ URZĄDZENIE" FontSize="9" FontWeight="Bold" Foreground="#88FFFFFF" Margin="0,0,0,8"/>
+                                    <TextBlock x:Name="InputDeviceLabel" Text="WYBIERZ URZĄDZENIE WEJŚCIOWE" FontSize="9" FontWeight="Bold" Foreground="#88FFFFFF" Margin="0,0,0,8"/>
                                     <ComboBox x:Name="DevicesComboBox" Height="42" Background="#050505" Foreground="White" BorderBrush="#44FFFFFF" BorderThickness="1"/>
-                                </StackPanel>
-                                
+
+                                    <TextBlock x:Name="OutputDeviceLabel" Text="WYBIERZ URZĄDZENIE WYJŚCIOWE (VIRTUAL CABLE)" FontSize="9" FontWeight="Bold" Foreground="#88FFFFFF" Margin="0,15,0,8" Visibility="Collapsed"/>
+                                    <ComboBox x:Name="OutputDevicesComboBox" Height="42" Background="#050505" Foreground="White" BorderBrush="#44FFFFFF" BorderThickness="1" Visibility="Collapsed"/>
+                                </StackPanel>                                
                                 <!-- 2. Shortcut Capture -->
                                 <StackPanel x:Name="ShortcutSettingsGroup" Visibility="Collapsed">
                                     <TextBlock Text="KOMBINACJA KLAWISZY" FontSize="9" FontWeight="Bold" Foreground="#88FFFFFF" Margin="0,0,0,8"/>

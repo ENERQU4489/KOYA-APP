@@ -18,7 +18,7 @@ const int potPins[] = {A0, A1}; // Górna gałka na A0, Dolna na A1
 // STAN
 bool lastButtonState[12];
 int lastSentPotValue[2] = {-1, -1};
-const int potJitterThreshold = 3; 
+const int potJitterThreshold = 5; 
 byte rawhidBuffer[64];
 
 void setup() {
@@ -42,11 +42,14 @@ void loop() {
     lastButtonState[i] = currentState;
   }
 
-  // 2. POTENCJOMETRY (0-255)
+  // 2. OBSŁUGA POTENCJOMETRÓW (Mapowanie Absolutne 0-255)
   for (int i = 0; i < 2; i++) {
     int rawVal = analogRead(potPins[i]);
     if (abs(rawVal - lastSentPotValue[i]) > potJitterThreshold) {
-      byte mappedVal = map(rawVal, 0, 1023, 0, 255);
+      // Kalibracja: 8-1015 zamiast 0-1023 dla pewności osiągnięcia 0 i 100%
+      int constrainedVal = constrain(rawVal, 8, 1015);
+      byte mappedVal = map(constrainedVal, 8, 1015, 0, 255);
+      
       sendReport(2, 12 + i, mappedVal);
       lastSentPotValue[i] = rawVal;
     }

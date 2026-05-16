@@ -121,7 +121,7 @@
                 <Grid Grid.Row="1" Margin="40,20">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="220"/>
+                        <ColumnDefinition Width="0.3*"/>
                     </Grid.ColumnDefinitions>
 
                     <!-- Buttons with Fixed Proportions -->
@@ -140,14 +140,27 @@
                         <Viewbox Margin="8"><Button Style="{StaticResource GlassButtonStyle}" Tag="11" Click="OnDeckButtonClick" MouseRightButtonUp="OnDeckButtonRightClick" Content="&#xE710;" Width="100" Height="100"/></Viewbox>
                     </UniformGrid>
 
-                    <!-- Knob Sidebar -->
+                    <!-- Knob Sidebar with Proportional Scaling -->
                     <Border Grid.Column="1" Background="#0AFFFFFF" CornerRadius="20" BorderThickness="1" BorderBrush="#15FFFFFF" Padding="25">
-                        <StackPanel Grid.Row="1" VerticalAlignment="Center">
-                            <Button Style="{StaticResource KnobButtonStyle}" Tag="12" Click="OnDeckButtonClick" MouseRightButtonUp="OnDeckButtonRightClick" 
-                                    Content="&#xE995;" Width="120" Height="120" MouseWheel="OnKnobMouseWheel" Margin="0,0,0,80"/>
-                            <Button Style="{StaticResource KnobButtonStyle}" Tag="13" Click="OnDeckButtonClick" MouseRightButtonUp="OnDeckButtonRightClick" 
-                                    Content="&#xE995;" Width="120" Height="120" MouseWheel="OnKnobMouseWheel"/>
-                        </StackPanel>
+                        <Grid VerticalAlignment="Center">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            
+                            <Viewbox Grid.Row="0" Margin="0,0,0,20">
+                                <Button Style="{StaticResource KnobButtonStyle}" Tag="12" Click="OnDeckButtonClick" MouseRightButtonUp="OnDeckButtonRightClick" 
+                                        Content="&#xE995;" Width="100" Height="100" MouseWheel="OnKnobMouseWheel"/>
+                            </Viewbox>
+
+                            <Rectangle Grid.Row="1" Height="1" Fill="#10FFFFFF" Margin="20,0"/>
+
+                            <Viewbox Grid.Row="2" Margin="0,20,0,0">
+                                <Button Style="{StaticResource KnobButtonStyle}" Tag="13" Click="OnDeckButtonClick" MouseRightButtonUp="OnDeckButtonRightClick" 
+                                        Content="&#xE995;" Width="100" Height="100" MouseWheel="OnKnobMouseWheel"/>
+                            </Viewbox>
+                        </Grid>
                     </Border>
                 </Grid>
 

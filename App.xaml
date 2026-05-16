@@ -111,27 +111,15 @@
                                     <ScaleTransform x:Name="mainScale" ScaleX="1" ScaleY="1"/>
                                 </Grid.RenderTransform>
                                 
-                                <!-- Pure White Outer Glow -->
                                 <Border x:Name="glow" CornerRadius="12" Opacity="0" Background="White">
-                                    <Border.Effect>
-                                        <DropShadowEffect BlurRadius="20" ShadowDepth="0" Color="White" Opacity="0.5"/>
-                                    </Border.Effect>
+                                    <Border.Effect><DropShadowEffect BlurRadius="20" ShadowDepth="0" Color="White" Opacity="0.5"/></Border.Effect>
                                 </Border>
 
-                                <!-- Pure Achromatic Body -->
-                                <Border x:Name="border" Background="{TemplateBinding Background}" 
-                                        BorderBrush="{TemplateBinding BorderBrush}" 
-                                        BorderThickness="{TemplateBinding BorderThickness}" 
-                                        CornerRadius="12" ClipToBounds="True">
+                                <Border x:Name="border" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="12" ClipToBounds="True">
                                     <Grid>
                                         <Border Background="#05FFFFFF" Opacity="0.5"/>
                                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center">
-                                            <ContentPresenter.Resources>
-                                                <Style TargetType="TextBlock">
-                                                    <Setter Property="FontFamily" Value="{StaticResource IconFont}"/>
-                                                    <Setter Property="FontSize" Value="20"/>
-                                                </Style>
-                                            </ContentPresenter.Resources>
+                                            <ContentPresenter.Resources><Style TargetType="TextBlock"><Setter Property="FontFamily" Value="{StaticResource IconFont}"/><Setter Property="FontSize" Value="20"/></Style></ContentPresenter.Resources>
                                         </ContentPresenter>
                                     </Grid>
                                 </Border>
@@ -141,44 +129,14 @@
                                 <Trigger Property="IsMouseOver" Value="True">
                                     <Setter Property="Background" Value="#25FFFFFF"/>
                                     <Setter Property="BorderBrush" Value="White"/>
-                                    <Trigger.EnterActions>
-                                        <BeginStoryboard>
-                                            <Storyboard>
-                                                <DoubleAnimation Storyboard.TargetName="mainScale" Storyboard.TargetProperty="ScaleX" To="1.05" Duration="0:0:0.2"/>
-                                                <DoubleAnimation Storyboard.TargetName="mainScale" Storyboard.TargetProperty="ScaleY" To="1.05" Duration="0:0:0.2"/>
-                                                <DoubleAnimation Storyboard.TargetName="glow" Storyboard.TargetProperty="Opacity" To="0.2" Duration="0:0:0.2"/>
-                                            </Storyboard>
-                                        </BeginStoryboard>
-                                    </Trigger.EnterActions>
-                                    <Trigger.ExitActions>
-                                        <BeginStoryboard>
-                                            <Storyboard>
-                                                <DoubleAnimation Storyboard.TargetName="mainScale" Storyboard.TargetProperty="ScaleX" To="1" Duration="0:0:0.2"/>
-                                                <DoubleAnimation Storyboard.TargetName="mainScale" Storyboard.TargetProperty="ScaleY" To="1" Duration="0:0:0.2"/>
-                                                <DoubleAnimation Storyboard.TargetName="glow" Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.2"/>
-                                            </Storyboard>
-                                        </BeginStoryboard>
-                                    </Trigger.ExitActions>
+                                    <Trigger.EnterActions><BeginStoryboard><Storyboard><DoubleAnimation Storyboard.TargetName="mainScale" Storyboard.TargetProperty="ScaleX" To="1.05" Duration="0:0:0.2"/><DoubleAnimation Storyboard.TargetName="mainScale" Storyboard.TargetProperty="ScaleY" To="1.05" Duration="0:0:0.2"/><DoubleAnimation Storyboard.TargetName="glow" Storyboard.TargetProperty="Opacity" To="0.2" Duration="0:0:0.2"/></Storyboard></BeginStoryboard></Trigger.EnterActions>
+                                    <Trigger.ExitActions><BeginStoryboard><Storyboard><DoubleAnimation Storyboard.TargetName="mainScale" Storyboard.TargetProperty="ScaleX" To="1" Duration="0:0:0.2"/><DoubleAnimation Storyboard.TargetName="mainScale" Storyboard.TargetProperty="ScaleY" To="1" Duration="0:0:0.2"/><DoubleAnimation Storyboard.TargetName="glow" Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.2"/></Storyboard></BeginStoryboard></Trigger.ExitActions>
                                 </Trigger>
                                 <Trigger Property="IsPressed" Value="True">
                                     <Setter Property="Background" Value="#66FFFFFF"/>
                                     <Setter TargetName="glow" Property="Opacity" Value="0.8"/>
-                                    <Trigger.EnterActions>
-                                        <BeginStoryboard>
-                                            <Storyboard>
-                                                <DoubleAnimation Storyboard.TargetName="mainScale" Storyboard.TargetProperty="ScaleX" To="0.95" Duration="0:0:0.1"/>
-                                                <DoubleAnimation Storyboard.TargetName="mainScale" Storyboard.TargetProperty="ScaleY" To="0.95" Duration="0:0:0.1"/>
-                                            </Storyboard>
-                                        </BeginStoryboard>
-                                    </Trigger.EnterActions>
-                                    <Trigger.ExitActions>
-                                        <BeginStoryboard>
-                                            <Storyboard>
-                                                <DoubleAnimation Storyboard.TargetName="mainScale" Storyboard.TargetProperty="ScaleX" To="1" Duration="0:0:0.1"/>
-                                                <DoubleAnimation Storyboard.TargetName="mainScale" Storyboard.TargetProperty="ScaleY" To="1" Duration="0:0:0.1"/>
-                                            </Storyboard>
-                                        </BeginStoryboard>
-                                    </Trigger.ExitActions>
+                                    <Trigger.EnterActions><BeginStoryboard><Storyboard><DoubleAnimation Storyboard.TargetName="mainScale" Storyboard.TargetProperty="ScaleX" To="0.95" Duration="0:0:0.1"/><DoubleAnimation Storyboard.TargetName="mainScale" Storyboard.TargetProperty="ScaleY" To="0.95" Duration="0:0:0.1"/></Storyboard></BeginStoryboard></Trigger.EnterActions>
+                                    <Trigger.ExitActions><BeginStoryboard><Storyboard><DoubleAnimation Storyboard.TargetName="mainScale" Storyboard.TargetProperty="ScaleX" To="1.05" Duration="0:0:0.1"/><DoubleAnimation Storyboard.TargetName="mainScale" Storyboard.TargetProperty="ScaleY" To="1.05" Duration="0:0:0.1"/></Storyboard></BeginStoryboard></Trigger.ExitActions>
                                 </Trigger>
                             </ControlTemplate.Triggers>
                         </ControlTemplate>
@@ -194,66 +152,45 @@
                     <Setter.Value>
                         <ControlTemplate TargetType="Button">
                             <Grid x:Name="knobRoot" RenderTransformOrigin="0.5,0.5">
-                                <Grid.RenderTransform>
-                                    <ScaleTransform ScaleX="1" ScaleY="1"/>
-                                </Grid.RenderTransform>
+                                <Grid.RenderTransform><ScaleTransform x:Name="knobScale" ScaleX="1" ScaleY="1"/></Grid.RenderTransform>
 
-                                <!-- Glow Effect -->
                                 <Border x:Name="glow" CornerRadius="100" Opacity="0" Background="White">
-                                    <Border.Effect>
-                                        <DropShadowEffect BlurRadius="25" Color="White" Opacity="0.4" ShadowDepth="0"/>
-                                    </Border.Effect>
+                                    <Border.Effect><DropShadowEffect BlurRadius="25" Color="White" Opacity="0.4" ShadowDepth="0"/></Border.Effect>
                                 </Border>
 
-                                <!-- Flat Circular Body -->
                                 <Border x:Name="itemBorder" Background="{TemplateBinding Background}" BorderThickness="1.5" BorderBrush="#33FFFFFF" CornerRadius="100">
                                     <Grid>
                                         <Grid x:Name="pointer" RenderTransformOrigin="0.5,0.5">
                                             <Grid.RenderTransform><RotateTransform Angle="0"/></Grid.RenderTransform>
                                             <Border Width="2" Height="14" Background="White" VerticalAlignment="Top" Margin="0,8,0,0" CornerRadius="1" Opacity="0.6"/>
                                         </Grid>
-                                        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                                            <TextBlock x:Name="valueText" Text="--" Foreground="White" FontSize="10" FontWeight="Bold" HorizontalAlignment="Center" Opacity="0.5" Margin="0,0,0,2"/>
-                                            <ContentPresenter x:Name="contentPresenter" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                                <ContentPresenter.Resources>
-                                                    <Style TargetType="TextBlock"><Setter Property="FontSize" Value="28"/><Setter Property="Foreground" Value="White"/><Setter Property="Opacity" Value="0.9"/></Style>
-                                                </ContentPresenter.Resources>
+
+                                        <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
+                                            <ContentPresenter x:Name="contentPresenter" Opacity="0.15">
+                                                <ContentPresenter.Resources><Style TargetType="TextBlock"><Setter Property="FontSize" Value="42"/><Setter Property="Foreground" Value="White"/></Style></ContentPresenter.Resources>
                                             </ContentPresenter>
-                                            <TextBlock x:Name="actionNameText" Text="" Foreground="White" FontSize="7" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0,3,0,0" Opacity="0.4" MaxWidth="70" TextAlignment="Center"/>
-                                        </StackPanel>
+                                            <TextBlock x:Name="valueText" Text="--" Foreground="White" FontSize="22" FontWeight="ExtraBold" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                <TextBlock.Effect><DropShadowEffect BlurRadius="8" Color="Black" Opacity="0.4" ShadowDepth="0"/></TextBlock.Effect>
+                                            </TextBlock>
+                                            <TextBlock x:Name="actionNameText" Visibility="Collapsed"/>
+                                        </Grid>
                                     </Grid>
                                 </Border>
                             </Grid>
 
                             <ControlTemplate.Triggers>
                                 <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter Property="Background" Value="#22FFFFFF"/>
-                                    <Setter TargetName="itemBorder" Property="BorderBrush" Value="#66FFFFFF"/>
-                                    <Trigger.EnterActions>
-                                        <BeginStoryboard>
-                                            <Storyboard>
-                                                <DoubleAnimation Storyboard.TargetName="knobRoot" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)" To="1.05" Duration="0:0:0.2"/>
-                                                <DoubleAnimation Storyboard.TargetName="knobRoot" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)" To="1.05" Duration="0:0:0.2"/>
-                                                <DoubleAnimation Storyboard.TargetName="glow" Storyboard.TargetProperty="Opacity" To="0.2" Duration="0:0:0.2"/>
-                                            </Storyboard>
-                                        </BeginStoryboard>
-                                    </Trigger.EnterActions>
-                                    <Trigger.ExitActions>
-                                        <BeginStoryboard>
-                                            <Storyboard>
-                                                <DoubleAnimation Storyboard.TargetName="knobRoot" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)" To="1" Duration="0:0:0.2"/>
-                                                <DoubleAnimation Storyboard.TargetName="knobRoot" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)" To="1" Duration="0:0:0.2"/>
-                                                <DoubleAnimation Storyboard.TargetName="glow" Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.2"/>
-                                            </Storyboard>
-                                        </BeginStoryboard>
-                                    </Trigger.ExitActions>
+                                    <Setter TargetName="itemBorder" Property="Background" Value="#15FFFFFF"/>
+                                    <Setter TargetName="itemBorder" Property="BorderBrush" Value="White"/>
+                                    <Setter TargetName="contentPresenter" Property="Opacity" Value="0.3"/>
+                                    <Trigger.EnterActions><BeginStoryboard><Storyboard><DoubleAnimation Storyboard.TargetName="knobScale" Storyboard.TargetProperty="ScaleX" To="1.05" Duration="0:0:0.2"/><DoubleAnimation Storyboard.TargetName="knobScale" Storyboard.TargetProperty="ScaleY" To="1.05" Duration="0:0:0.2"/><DoubleAnimation Storyboard.TargetName="glow" Storyboard.TargetProperty="Opacity" To="0.2" Duration="0:0:0.2"/></Storyboard></BeginStoryboard></Trigger.EnterActions>
+                                    <Trigger.ExitActions><BeginStoryboard><Storyboard><DoubleAnimation Storyboard.TargetName="knobScale" Storyboard.TargetProperty="ScaleX" To="1" Duration="0:0:0.2"/><DoubleAnimation Storyboard.TargetName="knobScale" Storyboard.TargetProperty="ScaleY" To="1" Duration="0:0:0.2"/><DoubleAnimation Storyboard.TargetName="glow" Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.2"/></Storyboard></BeginStoryboard></Trigger.ExitActions>
                                 </Trigger>
                                 <Trigger Property="IsPressed" Value="True">
                                     <Setter Property="Background" Value="#66FFFFFF"/>
                                     <Setter TargetName="glow" Property="Opacity" Value="0.6"/>
-                                    <Setter TargetName="knobRoot" Property="RenderTransform">
-                                        <Setter.Value><ScaleTransform ScaleX="0.96" ScaleY="0.94"/></Setter.Value>
-                                    </Setter>
+                                    <Trigger.EnterActions><BeginStoryboard><Storyboard><DoubleAnimation Storyboard.TargetName="knobScale" Storyboard.TargetProperty="ScaleX" To="0.95" Duration="0:0:0.1"/><DoubleAnimation Storyboard.TargetName="knobScale" Storyboard.TargetProperty="ScaleY" To="0.95" Duration="0:0:0.1"/></Storyboard></BeginStoryboard></Trigger.EnterActions>
+                                    <Trigger.ExitActions><BeginStoryboard><Storyboard><DoubleAnimation Storyboard.TargetName="knobScale" Storyboard.TargetProperty="ScaleX" To="1.05" Duration="0:0:0.1"/><DoubleAnimation Storyboard.TargetName="knobScale" Storyboard.TargetProperty="ScaleY" To="1.05" Duration="0:0:0.1"/></Storyboard></BeginStoryboard></Trigger.ExitActions>
                                 </Trigger>
                             </ControlTemplate.Triggers>
                         </ControlTemplate>
@@ -273,28 +210,7 @@
                                 <ScrollViewer Padding="{TemplateBinding Padding}" Focusable="False">
                                     <ScrollViewer.Resources>
                                         <Style TargetType="ScrollBar">
-                                            <Setter Property="Width" Value="6"/>
-                                            <Setter Property="Background" Value="Transparent"/>
-                                            <Setter Property="Template">
-                                                <Setter.Value>
-                                                    <ControlTemplate TargetType="ScrollBar">
-                                                        <Grid x:Name="Bg" Background="Transparent" SnapsToDevicePixels="true">
-                                                            <Track x:Name="PART_Track" IsDirectionReversed="true" IsEnabled="{TemplateBinding IsEnabled}">
-                                                                <Track.Thumb>
-                                                                    <Thumb>
-                                                                        <Thumb.Template>
-                                                                            <ControlTemplate TargetType="Thumb">
-                                                                                <Border Background="#44FFFFFF" CornerRadius="3" />
-                                                                            </ControlTemplate>
-                                                                        </Thumb.Template>
-                                                                    </Thumb>
-                                                                </Track.Thumb>
-                                                            </Track>
-                                                        </Grid>
-                                                    </ControlTemplate>
-                                                </Setter.Value>
-                                            </Setter>
-                                        </Style>
+                                            <Setter Property="Width" Value="6"/><Setter Property="Background" Value="Transparent"/><Setter Property="Template"><Setter.Value><ControlTemplate TargetType="ScrollBar"><Grid x:Name="Bg" Background="Transparent" SnapsToDevicePixels="true"><Track x:Name="PART_Track" IsDirectionReversed="true" IsEnabled="{TemplateBinding IsEnabled}"><Track.Thumb><Thumb><Thumb.Template><ControlTemplate TargetType="Thumb"><Border Background="#44FFFFFF" CornerRadius="3" /></ControlTemplate></Thumb.Template></Thumb></Track.Thumb></Track></Grid></ControlTemplate></Setter.Value></Setter></Style>
                                     </ScrollViewer.Resources>
                                     <ItemsPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
                                 </ScrollViewer>
@@ -310,21 +226,10 @@
                             <Setter Property="Template">
                                 <Setter.Value>
                                     <ControlTemplate TargetType="ListBoxItem">
-                                        <Border x:Name="itemBorder" Background="{TemplateBinding Background}" 
-                                                BorderThickness="1" BorderBrush="#11FFFFFF"
-                                                Width="145" Height="145" CornerRadius="10">
-                                            <ContentPresenter />
-                                        </Border>
+                                        <Border x:Name="itemBorder" Background="{TemplateBinding Background}" BorderThickness="1" BorderBrush="#11FFFFFF" Width="145" Height="145" CornerRadius="10"><ContentPresenter /></Border>
                                         <ControlTemplate.Triggers>
-                                            <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter TargetName="itemBorder" Property="Background" Value="#15FFFFFF"/>
-                                                <Setter TargetName="itemBorder" Property="BorderBrush" Value="#44FFFFFF"/>
-                                            </Trigger>
-                                            <Trigger Property="IsSelected" Value="True">
-                                                <Setter TargetName="itemBorder" Property="Background" Value="#22FFFFFF"/>
-                                                <Setter TargetName="itemBorder" Property="BorderBrush" Value="White"/>
-                                                <Setter Property="Foreground" Value="White"/>
-                                            </Trigger>
+                                            <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="itemBorder" Property="Background" Value="#15FFFFFF"/><Setter TargetName="itemBorder" Property="BorderBrush" Value="#44FFFFFF"/></Trigger>
+                                            <Trigger Property="IsSelected" Value="True"><Setter TargetName="itemBorder" Property="Background" Value="#22FFFFFF"/><Setter TargetName="itemBorder" Property="BorderBrush" Value="White"/><Setter Property="Foreground" Value="White"/></Trigger>
                                         </ControlTemplate.Triggers>
                                     </ControlTemplate>
                                 </Setter.Value>
