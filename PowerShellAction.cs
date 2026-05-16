@@ -42,5 +42,6 @@ namespace KOYA_APP
         }
 
         public void ExecuteAnalog(bool direction) { /* Nie dotyczy przycisków */ }
+        public void ExecuteAbsolute(int value) { }
     }
 }

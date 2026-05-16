@@ -34,7 +34,11 @@ namespace KOYA_APP
                 SetupTrayIcon();
                 LoadAndApplyConfig();
                 SetupTutorial();
-                SetupHid();
+                
+                this.Loaded += (s, e) => {
+                    _startupTime = DateTime.Now;
+                    SetupHid();
+                };
             }
             catch (Exception ex)
             {
@@ -42,6 +46,9 @@ namespace KOYA_APP
                 throw;
             }
         }
+
+        private DateTime _startupTime;
+        private bool IsAppStable => (DateTime.Now - _startupTime).TotalSeconds > 2;
 
         private void LoadAndApplyConfig()
         {
@@ -140,49 +147,58 @@ namespace KOYA_APP
             catch { }
         }
 
+        private bool _isPickerOpen = false;
         private void OpenPickerForIndex(int index)
         {
             if (index < 0 || index >= _buttonActions.Length) return;
-            
-            bool isAnalog = index >= 12;
-            ActionPicker picker = new ActionPicker(index, _hidBackend, isAnalog) { Owner = this };
-            
-            if (picker.ShowDialog() == true)
+            if (_isPickerOpen) return; // Zapobiegaj otwieraniu wielu okien na raz
+
+            _isPickerOpen = true;
+            try
             {
-                _buttonActions[index] = picker.SelectedAction!;
-                UpdateButtonUI(index, _buttonActions[index]!);
-                ConfigurationManager.SaveConfig(_buttonActions);
+                bool isAnalog = index >= 12;
+                ActionPicker picker = new ActionPicker(index, _hidBackend, isAnalog) { Owner = this };
+                
+                if (picker.ShowDialog() == true)
+                {
+                    _buttonActions[index] = picker.SelectedAction!;
+                    UpdateButtonUI(index, _buttonActions[index]!);
+                    ConfigurationManager.SaveConfig(_buttonActions);
+                }
+            }
+            finally
+            {
+                _isPickerOpen = false;
             }
         }
 
         private CancellationTokenSource? _connectionCts;
 
+        private DateTime _lastConnectionTime = DateTime.MinValue;
+        private bool IsHardwareStable => (DateTime.Now - _lastConnectionTime).TotalSeconds > 2;
+
         private void SetupHid()
         {
             _hidBackend.ButtonPressed += (index) =>
             {
-                System.Windows.Application.Current.Dispatcher.Invoke(async () =>
+                // Ignorujemy sygnały przez pierwsze 2 sekundy po podłączeniu
+                if (!IsHardwareStable) return;
+
+                System.Windows.Application.Current.Dispatcher.BeginInvoke(new Action(async () =>
                 {
                     if (index >= 0 && index < _buttonActions.Length)
                     {
                         var action = _buttonActions[index];
                         
-                        // 1. Jeśli akcja jest pusta i okno jest widoczne -> otwórz picker
-                        if (action == null && this.IsVisible && this.WindowState != WindowState.Minimized)
-                        {
-                            OpenPickerForIndex(index);
-                            return;
-                        }
-
                         if (action != null)
                         {
-                            // 2. Wykonaj akcję
+                            // Wykonaj akcję
                             action.Execute();
                             PlayClickSound();
                             ShowNotification(action.Icon, action.Name, "Akcja wykonana");
                         }
                         
-                        // 3. Wizualny feedback (Podświetlenie)
+                        // Wizualny feedback (Podświetlenie) zawsze, gdy naciśnięty fizyczny przycisk
                         if (_buttonCache.TryGetValue(index.ToString(), out var btn))
                         {
                             var originalBackground = btn.Background;
@@ -198,48 +214,50 @@ namespace KOYA_APP
                             btn.Background = originalBackground;
                         }
                     }
-                });
+                }));
             };
 
-            _hidBackend.KnobTurned += (index, direction) =>
+            _hidBackend.KnobAbsoluteChanged += (index, value) =>
             {
-                // Throttling: Nie przetwarzaj gałek częściej niż co 20ms dla tego samego indeksu
-                // To zapobiega "zalaniu" wątku UI i backendu przy bardzo szybkich obrotach
-                if (!ShouldProcessAnalog(index)) return;
+                if (!IsHardwareStable) return;
 
                 System.Windows.Application.Current.Dispatcher.BeginInvoke(new Action(() =>
                 {
                     if (index >= 0 && index < _buttonActions.Length)
                     {
                         var action = _buttonActions[index];
-
-                        if (action == null && this.IsVisible && this.WindowState != WindowState.Minimized)
-                        {
-                            OpenPickerForIndex(index);
-                            return;
-                        }
-
                         if (action != null)
                         {
-                            action.ExecuteAnalog(direction);
-                            ShowNotification(action.Icon, action.Name, direction ? "Zwiększono / Następny" : "Zmniejszono / Poprzedni");
+                            action.ExecuteAbsolute(value);
                         }
                         
-                        // Feedback wizualny tylko jeśli okno jest widoczne i nie za często
-                        if (this.IsVisible && _buttonCache.TryGetValue(index.ToString(), out var btn))
+                        // Update UI Knob rotation
+                        if (_buttonCache.TryGetValue(index.ToString(), out var btn))
                         {
-                             var originalBrush = btn.BorderBrush;
-                             btn.BorderBrush = System.Windows.Media.Brushes.White;
-                             System.Threading.Tasks.Task.Delay(100).ContinueWith(_ => 
-                                System.Windows.Application.Current.Dispatcher.BeginInvoke(new Action(() => btn.BorderBrush = originalBrush)));
+                            var transform = btn.Template.FindName("pointer", btn) as FrameworkElement;
+                            if (transform != null)
+                            {
+                                // Map 0-255 to -150 to 150 degrees (example range for a pot)
+                                double angle = (value / 255.0) * 300.0 - 150.0;
+                                transform.RenderTransform = new System.Windows.Media.RotateTransform(angle);
+                            }
                         }
                     }
                 }));
             };
 
+            _hidBackend.KnobTurned += (index, direction) =>
+            {
+                // To zostawiamy tylko dla enkoderów jeśli by były (obecnie nieużywane dla potów)
+                if (!IsHardwareStable) return;
+                // ... logic for relative encoders ...
+            };
+
             _hidBackend.ConnectionStatusChanged += (isConnected) =>
             {
-                System.Windows.Application.Current.Dispatcher.Invoke(async () =>
+                if (isConnected) _lastConnectionTime = DateTime.Now;
+
+                System.Windows.Application.Current.Dispatcher.BeginInvoke(new Action(async () =>
                 {
                     _connectionCts?.Cancel();
                     _connectionCts = new CancellationTokenSource();
@@ -249,7 +267,6 @@ namespace KOYA_APP
                     {
                         try 
                         { 
-                            // Czekamy 500ms przed pokazaniem overlay (stabilizacja)
                             await System.Threading.Tasks.Task.Delay(500, token); 
                             UpdateStatusUI(false);
                         } 
@@ -259,7 +276,7 @@ namespace KOYA_APP
                     {
                         UpdateStatusUI(true);
                     }
-                });
+                }));
             };
 
             _hidBackend.Start();
@@ -471,7 +488,6 @@ namespace KOYA_APP
             }
         }
 
-        private void TitleBar_MouseDown(object sender, MouseButtonEventArgs e) { if (e.ChangedButton == MouseButton.Left) this.DragMove(); }
         private void Close_Click(object sender, RoutedEventArgs e) => this.Hide();
         private void Minimize_Click(object sender, RoutedEventArgs e) => this.WindowState = WindowState.Minimized;
         

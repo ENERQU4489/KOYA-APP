@@ -45,7 +45,8 @@ namespace KOYA_APP
         string Icon { get; }
         string Category { get; }
         void Execute(); // Dla klikniecia
-        void ExecuteAnalog(bool direction); // true = w prawo / glosniej, false = w lewo / ciszej
+        void ExecuteAnalog(bool direction); // Dla enkoderów (krokowe)
+        void ExecuteAbsolute(int value);    // Dla potencjometrów (0-255)
     }
 }
 

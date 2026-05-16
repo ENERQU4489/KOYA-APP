@@ -25,5 +25,6 @@ namespace KOYA_APP
         }
 
         public void ExecuteAnalog(bool direction) { }
+        public void ExecuteAbsolute(int value) { }
     }
 }

@@ -159,6 +159,17 @@ namespace KOYA_APP
             catch { }
         }
 
+        public void SetBrightness(int brightness)
+        {
+            SetWmiBrightness(brightness);
+        }
+
+        public void ExecuteAbsolute(int value)
+        {
+            int brightness = (int)(value * 100.0 / 255.0);
+            SetWmiBrightness(brightness);
+        }
+
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
         public struct PHYSICAL_MONITOR
         {

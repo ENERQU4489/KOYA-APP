@@ -42,6 +42,7 @@ namespace KOYA_APP
         }
 
         public void ExecuteAnalog(bool direction) { /* Nie dotyczy przycisków */ }
+        public void ExecuteAbsolute(int value) { }
 
         // WinAPI do symulacji klawiszy
         [DllImport("user32.dll")]

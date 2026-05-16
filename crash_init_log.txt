@@ -1,3 +1,0 @@
-System.InvalidCastException: Unable to cast object of type 'System.Windows.Controls.Border' to type 'System.Windows.Controls.Grid'.
-   at KOYA_APP.MainWindow.SetupTutorial() in C:\Users\micha\Desktop\GEMINI\20 Projects\KOYA-APP\MainWindow.xaml.cs:line 35
-   at KOYA_APP.MainWindow..ctor() in C:\Users\micha\Desktop\GEMINI\20 Projects\KOYA-APP\MainWindow.xaml.cs:line 23

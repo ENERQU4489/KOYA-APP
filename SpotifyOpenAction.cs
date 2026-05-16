@@ -30,6 +30,7 @@ namespace KOYA_APP
         }
 
         public void ExecuteAnalog(bool direction) { }
+        public void ExecuteAbsolute(int value) { }
 
         [System.Runtime.InteropServices.DllImport("user32.dll")]
         private static extern bool SetForegroundWindow(System.IntPtr hWnd);

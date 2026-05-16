@@ -14,11 +14,10 @@ namespace KOYA_APP
             // Logika ustawienia na sztywno (Value)
         }
 
-        public void ExecuteAnalog(bool direction)
+        public void ExecuteAbsolute(int value)
         {
-            if (direction) Value = Math.Min(100, Value + 5);
-            else Value = Math.Max(0, Value - 5);
-            // Logika zmiany płynnej
+            Value = (int)(value * 100.0 / 255.0);
+            // Logika ustawienia na sztywno (Value)
         }
     }
 }

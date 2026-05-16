@@ -29,6 +29,7 @@ namespace KOYA_APP
             {
                 action.ExecuteAnalog(direction);
             }
+        public void ExecuteAbsolute(int value) { }
         }
     }
 }

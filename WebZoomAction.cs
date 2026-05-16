@@ -14,5 +14,10 @@ namespace KOYA_APP
 
         [DllImport("user32.dll")] private static extern void keybd_event(byte bVk, byte bScan, uint dwFlags, int dwExtraInfo);
         [DllImport("user32.dll")] private static extern void mouse_event(uint dwFlags, int dx, int dy, uint dwData, int dwExtraInfo);
+
+        public void ExecuteAbsolute(int value)
+        {
+            // Map 0-255 to 50-300 range (Optional implementation)
+        }
     }
 }

@@ -29,7 +29,10 @@ namespace KOYA_APP
         InitializeComponent();
         _targetButtonIndex = buttonIndex;
         _hid = hid;
-        this.Closed += (s, e) => StopRecording();
+        this.Closed += (s, e) => {
+            StopRecording();
+            _hid.ButtonPressed -= HandleHardwareButtonForMacro;
+        };
 
         _hid.ButtonPressed += HandleHardwareButtonForMacro;
 

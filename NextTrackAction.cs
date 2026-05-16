@@ -16,6 +16,7 @@ namespace KOYA_APP
         }
 
         public void ExecuteAnalog(bool direction) { }
+        public void ExecuteAbsolute(int value) { }
 
         [DllImport("user32.dll")]
         private static extern void keybd_event(byte bVk, byte bScan, uint dwFlags, int dwExtraInfo);

@@ -14,10 +14,10 @@ namespace KOYA_APP
             // Logika ustawienia na sztywno
         }
 
-        public void ExecuteAnalog(bool direction)
+        public void ExecuteAbsolute(int value)
         {
-            if (direction) Value = (Value + 10) % 360;
-            else Value = (Value - 10 + 360) % 360;
+            Value = (int)(value * 360.0 / 255.0);
+            // Logika ustawienia na sztywno
         }
     }
 }
